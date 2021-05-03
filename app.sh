@@ -12,6 +12,6 @@ trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
 
 THOTH_PIPELINE_TASK=${THOTH_PIPELINE_TASK:?'THOTH_PIPELINE_TASK is not selected!'}
 
-if [ "$THOTH_WORKFLOW_TASK" = "gather_metrics" ]; then
+if [ "$THOTH_PIPELINE_TASK" = "gather_metrics" ]; then
     exec python3 gather_metrics.py
 fi
