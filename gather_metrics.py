@@ -28,8 +28,6 @@ from thoth.pipeline_helpers import __version__ as __service_version__
 _LOGGER = logging.getLogger("thoth.gather_metrics")
 _LOGGER.info("Thoth pipeline-helpers task: gather_metrics v%s", __service_version__)
 
-COMPONENT_NAME = "pipeline_helpers.gather_metrics"
-
 # We use a file for stdout and stderr not to block on pipe.
 _EXEC_STDOUT_FILE = os.getenv("PIPELINE_STDOUT_PATH", "script.stdout")
 _EXEC_STDERR_FILE = os.getenv("PIPELINE_STDERR_PATH", "script.stderr")
