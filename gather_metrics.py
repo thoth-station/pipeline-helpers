@@ -18,7 +18,6 @@
 """This script run in a pipeline task to execute test and gather metrics for a AI model deployed."""
 
 import os
-import sys
 import logging
 import json
 import subprocess
@@ -46,18 +45,16 @@ def gather_metrics() -> None:
     args = ["pipenv", "run", "python3", _EXEC_FILE]
     _LOGGER.info(f"Args to be used in process: {args}")
 
-    with open(
-        os.path.join(_EXEC_DIR, _EXEC_STDOUT_FILE), "w"
-        ) as stdout_file, open(
-            os.path.join(_EXEC_DIR, _EXEC_STDERR_FILE), "w"
-            ) as stderr_file:
+    with open(os.path.join(_EXEC_DIR, _EXEC_STDOUT_FILE), "w") as stdout_file, open(
+        os.path.join(_EXEC_DIR, _EXEC_STDERR_FILE), "w"
+    ) as stderr_file:
         process = subprocess.Popen(args, stdout=stdout_file, stderr=stderr_file, universal_newlines=True)
 
     process.communicate()
 
     return_code = process.returncode
     if return_code != 0:
-        with open(_EXEC_STDERR_FILE, "r") as stderr_file:       
+        with open(_EXEC_STDERR_FILE, "r") as stderr_file:
             stderr = stderr_file.read()
             _LOGGER.error(f"Error running script in pipeline-helpers: {stderr}")
             return
@@ -71,6 +68,7 @@ def gather_metrics() -> None:
             # We were not able to load JSON, pass string as output.
             pass
         _LOGGER.info(f"Metrics collected are {stdout}")
+
 
 if __name__ == "__main__":
     gather_metrics()
