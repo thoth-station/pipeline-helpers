@@ -18,6 +18,7 @@
 """This script run in a pipeline task to execute test and gather metrics for a AI model deployed."""
 
 import os
+import sys
 import logging
 import json
 import subprocess
@@ -54,16 +55,23 @@ def gather_metrics() -> None:
 
     process.communicate()
 
-    # Load stdout and stderr.
+    return_code = process.returncode
+    if return_code != 0:
+        with open(_EXEC_STDERR_FILE, "r") as stderr_file:       
+            stderr = stderr_file.read()
+            _LOGGER.error(f"Error during collection of metrics: {stderr}")
+            return
+
+    # Load stdout.
     with open(_EXEC_STDOUT_FILE, "r") as stdout_file:
         stdout = stdout_file.read()
         try:
             stdout = json.loads(str(stdout))
+            _LOGGER.info(f"Metrics collected are {stdout}")
         except Exception:
             # We were not able to load JSON, pass string as output.
             pass
 
-    # Store file to be prepared in next step
 
 if __name__ == "__main__":
     gather_metrics()
