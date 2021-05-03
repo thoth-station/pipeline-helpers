@@ -20,6 +20,9 @@
 import os
 import logging
 import json
+import subprocess
+
+from thoth.pipeline_helpers import __version__ as __service_version__
 
 
 _LOGGER = logging.getLogger("thoth.gather_metrics")
@@ -39,7 +42,8 @@ _EXEC_FILE = os.getenv("PIPELINE_EXEC_FILE", os.path.join(_EXEC_DIR, _TEST_PATH)
 def gather_metrics() -> None:
     """Gather metrics running a test script created by data scientist."""
     # Execute the supplied script.
-    args = ["pipenv", "run", _EXEC_FILE]
+    args = ["pipenv", "run", "python3", _EXEC_FILE]
+    _LOGGER.info(f"Args to be used in process: {args}")
 
     with open(
         os.path.join(_EXEC_DIR, _EXEC_STDOUT_FILE), "w"
