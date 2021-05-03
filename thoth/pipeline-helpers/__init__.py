@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# project template
-# Copyright(C) 2021 Red Hat, Inc.
+# thoth-pipeline-helpers
+# Copyright(C) 2020 Francesco Murdaca
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,9 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""This is the main script of the template project."""
 
-from template.version import __version__
+"""This is pipeline helper for Tekton task and steps."""
 
-if __name__ == "__main__":
-    print(f"A template project with Thoth integration, v{__version__}.")
+__version__ = "0.0.1"
