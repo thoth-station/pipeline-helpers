@@ -1,6 +1,6 @@
 [project]
-name = "TODO"
-description = "TODO"
+name = "pipeline-helpers"
+description = "This repo is used to collect all helpers that can be used across pipelines."
 readme = "README.rst"
 requires-python = ">=3.8"
 license = {file = "LICENSE"}
