@@ -59,7 +59,7 @@ def gather_metrics() -> None:
     if return_code != 0:
         with open(_EXEC_STDERR_FILE, "r") as stderr_file:       
             stderr = stderr_file.read()
-            _LOGGER.error(f"Error during collection of metrics: {stderr}")
+            _LOGGER.error(f"Error running script in pipeline-helpers: {stderr}")
             return
 
     # Load stdout.
@@ -67,11 +67,10 @@ def gather_metrics() -> None:
         stdout = stdout_file.read()
         try:
             stdout = json.loads(str(stdout))
-            _LOGGER.info(f"Metrics collected are {stdout}")
         except Exception:
             # We were not able to load JSON, pass string as output.
             pass
-
+        _LOGGER.info(f"Metrics collected are {stdout}")
 
 if __name__ == "__main__":
     gather_metrics()
