@@ -30,10 +30,9 @@ _RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME", "test")
 _EXEC_STDOUT_FILE = os.getenv("PIPELINE_STDOUT_PATH", "script.stdout")
 _EXEC_STDERR_FILE = os.getenv("PIPELINE_STDERR_PATH", "script.stderr")
 
-_EXEC_DIR = os.getenv("PIPELINE_EXEC_DIR", ".")
+_EXEC_DIR = os.getenv("PIPELINE_EXEC_DIR", "..")
 _TEST_PATH = os.getenv("MODEL_TEST_PATH", "src/test.py")
-_REPO_PATH = os.getenv("REPO_TEST_PATH", "workspaces/repo")
-_EXEC_FILE = os.getenv("PIPELINE_EXEC_FILE", os.path.join(_EXEC_DIR, _TEST_PATH))
+_REPO_PATH = os.getenv("REPO_TEST_PATH", "repo")
 
 
 def gather_metrics() -> None:
@@ -46,7 +45,7 @@ def gather_metrics() -> None:
     _LOGGER.info(f"Args to be used to install: {args}")
 
     # Execute the supplied script.
-    args = ["behave", _EXEC_FILE]
+    args = ["behave"]
     _LOGGER.info(f"Args to be used in process: {args}")
 
     with open(os.path.join(_EXEC_DIR, _EXEC_STDOUT_FILE), "w") as stdout_file, open(
