@@ -22,11 +22,8 @@ import logging
 import json
 import subprocess
 
-from thoth.pipeline_helpers import __version__ as __service_version__
-
 
 _LOGGER = logging.getLogger("thoth.gather_metrics")
-_LOGGER.info("Thoth pipeline-helpers task: gather_metrics v%s", __service_version__)
 
 _RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME", "test")
 # We use a file for stdout and stderr not to block on pipe.
