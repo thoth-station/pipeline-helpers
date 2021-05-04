@@ -64,7 +64,7 @@ def gather_metrics() -> None:
 
     return_code = process.returncode
     if return_code != 0:
-        with open(_EXEC_STDERR_FILE, "r") as stderr_file:
+        with open(os.path.join(_OUTPUT_DIR, _EXEC_STDERR_FILE), "r") as stderr_file:
             stderr = stderr_file.read()
             _LOGGER.error(f"Error running script in pipeline-helpers: {stderr}")
             return
