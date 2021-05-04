@@ -44,6 +44,12 @@ def gather_metrics() -> None:
     # Install requirements.
     args = ["thamos", "install", "-r", f"{_RUNTIME_ENVIRONMENT_TEST}"]
     _LOGGER.info(f"Args to be used to install: {args}")
+    process_output = subprocess.run(
+        args,
+        shell=True,
+        capture_output=True,
+    )
+    _LOGGER.info(f"After installing packages: {process_output}")
 
     # Execute the supplied script.
     args = ["behave"]
