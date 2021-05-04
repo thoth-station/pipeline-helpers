@@ -30,17 +30,9 @@ _RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME", "test")
 _EXEC_STDOUT_FILE = os.getenv("PIPELINE_STDOUT_PATH", "script.stdout")
 _EXEC_STDERR_FILE = os.getenv("PIPELINE_STDERR_PATH", "script.stderr")
 
-_SCRIPT_DIR = os.getenv("PIPELINE_SCRIPT_DIR", ".")
-_OUTPUT_DIR = os.getenv("PIPELINE_OUTPUT_DIR", "..")
-_TEST_PATH = os.getenv("MODEL_TEST_PATH", "src/test.py")
-_REPO_PATH = os.getenv("REPO_TEST_PATH", "repo")
-
 
 def gather_metrics() -> None:
     """Gather metrics running a test script created by data scientist."""
-    # Move to repo where /features and requirements/.thoth.yaml
-    os.chdir(os.path.join(_SCRIPT_DIR, _REPO_PATH))
-
     # Install requirements.
     args = ["thamos", "install", "-r", f"{_RUNTIME_ENVIRONMENT_TEST}"]
     _LOGGER.info(f"Args to be used to install: {args}")
@@ -55,8 +47,10 @@ def gather_metrics() -> None:
     args = ["behave"]
     _LOGGER.info(f"Args to be used in process: {args}")
 
-    with open(os.path.join(_OUTPUT_DIR, _EXEC_STDOUT_FILE), "w") as stdout_file, open(
-        os.path.join(_OUTPUT_DIR, _EXEC_STDERR_FILE), "w"
+    with open(
+        _EXEC_STDOUT_FILE, "w"
+    ) as stdout_file, open(
+        _EXEC_STDERR_FILE, "w"
     ) as stderr_file:
         process = subprocess.Popen(args, shell=True, stdout=stdout_file, stderr=stderr_file, universal_newlines=True)
 
