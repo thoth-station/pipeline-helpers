@@ -58,7 +58,7 @@ def gather_metrics() -> None:
     with open(os.path.join(_OUTPUT_DIR, _EXEC_STDOUT_FILE), "w") as stdout_file, open(
         os.path.join(_OUTPUT_DIR, _EXEC_STDERR_FILE), "w"
     ) as stderr_file:
-        process = subprocess.Popen(args, stdout=stdout_file, stderr=stderr_file, universal_newlines=True)
+        process = subprocess.Popen(args, shell=True, stdout=stdout_file, stderr=stderr_file, universal_newlines=True)
 
     process.communicate()
 
