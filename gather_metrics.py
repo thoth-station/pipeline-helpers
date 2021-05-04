@@ -28,6 +28,7 @@ from thoth.pipeline_helpers import __version__ as __service_version__
 _LOGGER = logging.getLogger("thoth.gather_metrics")
 _LOGGER.info("Thoth pipeline-helpers task: gather_metrics v%s", __service_version__)
 
+_RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME", "test")
 # We use a file for stdout and stderr not to block on pipe.
 _EXEC_STDOUT_FILE = os.getenv("PIPELINE_STDOUT_PATH", "script.stdout")
 _EXEC_STDERR_FILE = os.getenv("PIPELINE_STDERR_PATH", "script.stderr")
@@ -39,8 +40,15 @@ _EXEC_FILE = os.getenv("PIPELINE_EXEC_FILE", os.path.join(_EXEC_DIR, _TEST_PATH)
 
 def gather_metrics() -> None:
     """Gather metrics running a test script created by data scientist."""
+    # Move to repo where /features and requirements/.thoth.yaml are
+    os.chdir("./workspace/repo")
+
+    # Install requirements.
+    args = ["thamos", "install", "-r", f"{_RUNTIME_ENVIRONMENT_TEST}"]
+    _LOGGER.info(f"Args to be used to install: {args}")
+
     # Execute the supplied script.
-    args = ["pipenv", "run", "python3", _EXEC_FILE]
+    args = ["behave", _EXEC_FILE]
     _LOGGER.info(f"Args to be used in process: {args}")
 
     with open(os.path.join(_EXEC_DIR, _EXEC_STDOUT_FILE), "w") as stdout_file, open(
@@ -58,14 +66,15 @@ def gather_metrics() -> None:
             return
 
     # Load stdout.
-    with open(_EXEC_STDOUT_FILE, "r") as stdout_file:
-        stdout = stdout_file.read()
+    with open("metrics.json", "r") as stdout_file:
         try:
-            stdout = json.loads(str(stdout))
-        except Exception:
-            # We were not able to load JSON, pass string as output.
-            pass
+            stdout = json.load(stdout_file)
+        except Exception as exc:
+            _LOGGER.error(f"Error loading metrics: {exc}")
+            return
         _LOGGER.info(f"Metrics collected are {stdout}")
+
+    # TODO: Store result to track changes?
 
 
 if __name__ == "__main__":
