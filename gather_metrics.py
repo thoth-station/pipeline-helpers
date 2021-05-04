@@ -47,18 +47,14 @@ def gather_metrics() -> None:
     args = ["behave"]
     _LOGGER.info(f"Args to be used in process: {args}")
 
-    with open(
-        _EXEC_STDOUT_FILE, "w"
-    ) as stdout_file, open(
-        _EXEC_STDERR_FILE, "w"
-    ) as stderr_file:
+    with open(_EXEC_STDOUT_FILE, "w") as stdout_file, open(_EXEC_STDERR_FILE, "w") as stderr_file:
         process = subprocess.Popen(args, shell=True, stdout=stdout_file, stderr=stderr_file, universal_newlines=True)
 
     process.communicate()
 
     return_code = process.returncode
     if return_code != 0:
-        with open(os.path.join(_OUTPUT_DIR, _EXEC_STDERR_FILE), "r") as stderr_file:
+        with open(_EXEC_STDERR_FILE, "r") as stderr_file:
             stderr = stderr_file.read()
             _LOGGER.error(f"Error running script in pipeline-helpers: {stderr}")
             return
