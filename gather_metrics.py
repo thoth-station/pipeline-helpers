@@ -35,13 +35,14 @@ _EXEC_STDERR_FILE = os.getenv("PIPELINE_STDERR_PATH", "script.stderr")
 
 _EXEC_DIR = os.getenv("PIPELINE_EXEC_DIR", ".")
 _TEST_PATH = os.getenv("MODEL_TEST_PATH", "src/test.py")
+_REPO_PATH = os.getenv("MODEL_TEST_PATH", "workspaces/repo")
 _EXEC_FILE = os.getenv("PIPELINE_EXEC_FILE", os.path.join(_EXEC_DIR, _TEST_PATH))
 
 
 def gather_metrics() -> None:
     """Gather metrics running a test script created by data scientist."""
-    # Move to repo where /features and requirements/.thoth.yaml are
-    os.chdir("./workspace/repo")
+    # Move to repo where /features and requirements/.thoth.yaml
+    os.chdir(os.path.join(_EXEC_DIR, _REPO_PATH))
 
     # Install requirements.
     args = ["thamos", "install", "-r", f"{_RUNTIME_ENVIRONMENT_TEST}"]
