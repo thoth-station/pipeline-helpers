@@ -36,28 +36,33 @@ def gather_metrics() -> None:
     # Install requirements.
     args = ["thamos", "install", "-r", f"{_RUNTIME_ENVIRONMENT_TEST}"]
     _LOGGER.info(f"Args to be used to install: {args}")
-    process_output = subprocess.run(
-        args,
-        shell=True,
-        capture_output=True,
-    )
-    _LOGGER.info(f"After installing packages: {process_output}")
+
+    try:
+        process_output = subprocess.run(
+            args,
+            shell=True,
+            capture_output=True,
+        )
+        _LOGGER.info(f"After installing packages: {process_output.stdout.decode('utf-8')}")
+
+    except Exception as behave_feature:
+        _LOGGER.error("error running test: %r", behave_feature)
+        return
 
     # Execute the supplied script.
     args = ["behave"]
     _LOGGER.info(f"Args to be used in process: {args}")
 
-    with open(_EXEC_STDOUT_FILE, "w") as stdout_file, open(_EXEC_STDERR_FILE, "w") as stderr_file:
-        process = subprocess.Popen(args, shell=True, stdout=stdout_file, stderr=stderr_file, universal_newlines=True)
-
-    process.communicate()
-
-    return_code = process.returncode
-    if return_code != 0:
-        with open(_EXEC_STDERR_FILE, "r") as stderr_file:
-            stderr = stderr_file.read()
-            _LOGGER.error(f"Error running script in pipeline-helpers: {stderr}")
-            return
+    try:
+        process_output = subprocess.run(
+            args,
+            shell=True,
+            capture_output=True,
+        )
+        _LOGGER.info(process_output.stdout.decode("utf-8"))
+    except Exception as behave_feature:
+        _LOGGER.error("error running test: %r", behave_feature)
+        return
 
     # Load stdout.
     with open("metrics.json", "r") as stdout_file:
