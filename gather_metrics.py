@@ -20,8 +20,15 @@
 import os
 import logging
 import json
+import sys
 import subprocess
 
+_DEBUG_LEVEL = bool(int(os.getenv("DEBUG_LEVEL", 0)))
+
+if _DEBUG_LEVEL:
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.INFO)
 
 _LOGGER = logging.getLogger("thoth.gather_metrics")
 
@@ -34,7 +41,7 @@ _EXEC_STDERR_FILE = os.getenv("PIPELINE_STDERR_PATH", "script.stderr")
 def gather_metrics() -> None:
     """Gather metrics running a test script created by data scientist."""
     # Install requirements.
-    args = ["thamos", "install", "-r", f"{_RUNTIME_ENVIRONMENT_TEST}"]
+    args = [f"thamos install -r {_RUNTIME_ENVIRONMENT_TEST}"]
     _LOGGER.info(f"Args to be used to install: {args}")
 
     try:
@@ -46,8 +53,8 @@ def gather_metrics() -> None:
         _LOGGER.info(f"After installing packages: {process_output.stdout.decode('utf-8')}")
 
     except Exception as behave_feature:
-        _LOGGER.error("error running test: %r", behave_feature)
-        return
+        _LOGGER.error("error installing packages: %r", behave_feature)
+        return sys.exit(1)
 
     # Execute the supplied script.
     args = ["behave"]
@@ -61,8 +68,9 @@ def gather_metrics() -> None:
         )
         _LOGGER.info(process_output.stdout.decode("utf-8"))
     except Exception as behave_feature:
+        _LOGGER.error(process_output.stderr.decode("utf-8"))
         _LOGGER.error("error running test: %r", behave_feature)
-        return
+        return sys.exit(1)
 
     # Load stdout.
     with open("metrics.json", "r") as stdout_file:
@@ -70,7 +78,7 @@ def gather_metrics() -> None:
             stdout = json.load(stdout_file)
         except Exception as exc:
             _LOGGER.error(f"Error loading metrics: {exc}")
-            return
+            return sys.exit(1)
         _LOGGER.info(f"Metrics collected are {stdout}")
 
     # TODO: Store result to track changes?
