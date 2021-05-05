@@ -57,15 +57,10 @@ def gather_metrics() -> None:
         sys.exit(1)
 
     # Execute the supplied script.
-    _LOGGER.info(f"Executing behave command... ")
+    _LOGGER.info("Executing behave command... ")
 
     try:
-        process_output = subprocess.run(
-            "behave",
-            shell=True,
-            capture_output=True,
-            check=True
-        )
+        process_output = subprocess.run("behave", shell=True, capture_output=True, check=True)
         _LOGGER.info(f"Finished running test with: {process_output.stdout.decode('utf-8')}")
 
     except Exception:
