@@ -54,7 +54,7 @@ def gather_metrics() -> None:
 
     except Exception as behave_feature:
         _LOGGER.error("error installing packages: %r", behave_feature)
-        return sys.exit(1)
+        sys.exit(1)
 
     # Execute the supplied script.
     args = ["behave"]
@@ -66,19 +66,19 @@ def gather_metrics() -> None:
             shell=True,
             capture_output=True,
         )
-        _LOGGER.info(process_output.stdout.decode("utf-8"))
-    except Exception as behave_feature:
-        _LOGGER.error(process_output.stderr.decode("utf-8"))
-        _LOGGER.error("error running test: %r", behave_feature)
-        return sys.exit(1)
+        _LOGGER.info(f"Successfully run the test: {process_output.stdout.decode('utf-8')}")
+
+    except Exception:
+        _LOGGER.error("Error running test: %r", process_output.stderr.decode("utf-8"))
+        sys.exit(1)
 
     # Load stdout.
-    with open("metrics.json", "r") as stdout_file:
+    with open("/opt/app-root/src/metrics.json", "r") as stdout_file:
         try:
             stdout = json.load(stdout_file)
         except Exception as exc:
             _LOGGER.error(f"Error loading metrics: {exc}")
-            return sys.exit(1)
+            sys.exit(1)
         _LOGGER.info(f"Metrics collected are {stdout}")
 
     # TODO: Store result to track changes?
