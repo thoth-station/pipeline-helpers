@@ -72,7 +72,7 @@ def gather_metrics() -> None:
         _LOGGER.error("Error running test: %r", process_output.stderr.decode("utf-8"))
         sys.exit(1)
 
-    # Load stdout.
+    # Load metrics from file created by behave.
     with open("/opt/app-root/src/metrics.json", "r") as stdout_file:
         try:
             stdout = json.load(stdout_file)
