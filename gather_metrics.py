@@ -20,52 +20,62 @@
 import os
 import logging
 import json
+import sys
 import subprocess
 
-from thoth.pipeline_helpers import __version__ as __service_version__
+_DEBUG_LEVEL = bool(int(os.getenv("DEBUG_LEVEL", 0)))
 
+if _DEBUG_LEVEL:
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.INFO)
 
 _LOGGER = logging.getLogger("thoth.gather_metrics")
-_LOGGER.info("Thoth pipeline-helpers task: gather_metrics v%s", __service_version__)
 
-# We use a file for stdout and stderr not to block on pipe.
-_EXEC_STDOUT_FILE = os.getenv("PIPELINE_STDOUT_PATH", "script.stdout")
-_EXEC_STDERR_FILE = os.getenv("PIPELINE_STDERR_PATH", "script.stderr")
-
-_EXEC_DIR = os.getenv("PIPELINE_EXEC_DIR", ".")
-_TEST_PATH = os.getenv("MODEL_TEST_PATH", "src/test.py")
-_EXEC_FILE = os.getenv("PIPELINE_EXEC_FILE", os.path.join(_EXEC_DIR, _TEST_PATH))
+RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME", "test")
+METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_METRICS_FILE_PATH", "/opt/app-root/src/metrics.json")
+BEHAVE_COMMAND = os.getenv("PIPELINE_HELPERS_BEHAVE_COMMAND", "behave")
 
 
 def gather_metrics() -> None:
     """Gather metrics running a test script created by data scientist."""
+    # Install requirements.
+    args = [f"thamos install -r {RUNTIME_ENVIRONMENT_TEST}"]
+    _LOGGER.info(f"Args to be used to install: {args}")
+
+    try:
+        process_output = subprocess.run(
+            args,
+            shell=True,
+            capture_output=True,
+        )
+        _LOGGER.info(f"After installing packages: {process_output.stdout.decode('utf-8')}")
+
+    except Exception as behave_feature:
+        _LOGGER.error("error installing packages: %r", behave_feature)
+        sys.exit(1)
+
     # Execute the supplied script.
-    args = ["pipenv", "run", "python3", _EXEC_FILE]
-    _LOGGER.info(f"Args to be used in process: {args}")
+    _LOGGER.info(f"Executing command to gather metrics... {BEHAVE_COMMAND}")
 
-    with open(os.path.join(_EXEC_DIR, _EXEC_STDOUT_FILE), "w") as stdout_file, open(
-        os.path.join(_EXEC_DIR, _EXEC_STDERR_FILE), "w"
-    ) as stderr_file:
-        process = subprocess.Popen(args, stdout=stdout_file, stderr=stderr_file, universal_newlines=True)
+    try:
+        process_output = subprocess.run(BEHAVE_COMMAND, shell=True, capture_output=True, check=True)
+        _LOGGER.info(f"Finished running test with: {process_output.stdout.decode('utf-8')}")
 
-    process.communicate()
+    except Exception:
+        _LOGGER.error("Error running test: %r", process_output.stderr.decode("utf-8"))
+        sys.exit(1)
 
-    return_code = process.returncode
-    if return_code != 0:
-        with open(_EXEC_STDERR_FILE, "r") as stderr_file:
-            stderr = stderr_file.read()
-            _LOGGER.error(f"Error running script in pipeline-helpers: {stderr}")
-            return
-
-    # Load stdout.
-    with open(_EXEC_STDOUT_FILE, "r") as stdout_file:
-        stdout = stdout_file.read()
+    # Load metrics from file created by behave.
+    with open(METRICS_FILE_PATH, "r") as stdout_file:
         try:
-            stdout = json.loads(str(stdout))
-        except Exception:
-            # We were not able to load JSON, pass string as output.
-            pass
+            stdout = json.load(stdout_file)
+        except Exception as exc:
+            _LOGGER.error(f"Error loading metrics: {exc}")
+            sys.exit(1)
         _LOGGER.info(f"Metrics collected are {stdout}")
+
+    # TODO: Store result to track changes?
 
 
 if __name__ == "__main__":
