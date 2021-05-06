@@ -32,16 +32,15 @@ else:
 
 _LOGGER = logging.getLogger("thoth.gather_metrics")
 
-_RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME", "test")
-# We use a file for stdout and stderr not to block on pipe.
-_EXEC_STDOUT_FILE = os.getenv("PIPELINE_STDOUT_PATH", "script.stdout")
-_EXEC_STDERR_FILE = os.getenv("PIPELINE_STDERR_PATH", "script.stderr")
+RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME", "test")
+METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_METRICS_FILE_PATH", "/opt/app-root/src/metrics.json")
+BEHAVE_COMMAND = os.getenv("PIPELINE_HELPERS_BEHAVE_COMMAND", "behave")
 
 
 def gather_metrics() -> None:
     """Gather metrics running a test script created by data scientist."""
     # Install requirements.
-    args = [f"thamos install -r {_RUNTIME_ENVIRONMENT_TEST}"]
+    args = [f"thamos install -r {RUNTIME_ENVIRONMENT_TEST}"]
     _LOGGER.info(f"Args to be used to install: {args}")
 
     try:
@@ -57,10 +56,10 @@ def gather_metrics() -> None:
         sys.exit(1)
 
     # Execute the supplied script.
-    _LOGGER.info("Executing behave command... ")
+    _LOGGER.info(f"Executing command to gather metrics... {BEHAVE_COMMAND}")
 
     try:
-        process_output = subprocess.run("behave", shell=True, capture_output=True, check=True)
+        process_output = subprocess.run(BEHAVE_COMMAND, shell=True, capture_output=True, check=True)
         _LOGGER.info(f"Finished running test with: {process_output.stdout.decode('utf-8')}")
 
     except Exception:
@@ -68,7 +67,7 @@ def gather_metrics() -> None:
         sys.exit(1)
 
     # Load metrics from file created by behave.
-    with open("/opt/app-root/src/metrics.json", "r") as stdout_file:
+    with open(METRICS_FILE_PATH, "r") as stdout_file:
         try:
             stdout = json.load(stdout_file)
         except Exception as exc:
