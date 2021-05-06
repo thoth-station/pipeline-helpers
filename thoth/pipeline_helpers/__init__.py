@@ -18,4 +18,4 @@
 
 """This is pipeline helper for Tekton task and steps."""
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
