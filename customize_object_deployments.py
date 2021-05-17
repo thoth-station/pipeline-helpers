@@ -41,7 +41,7 @@ def customize_object_deployments() -> None:
     with open("/workspace/pr/pr.json") as f:
         pr_info = json.load(f)
 
-    label = f'{pr_info["Base"]["Repo"]["FullName"]}-pr-{pr_info["Number"]}'
+    label = f'{pr_info["Base"]["Repo"]["Name"]}-pr-{pr_info["Number"]}'
 
     # Handle DC YAMLfile
     with open("/opt/app-root/src/manifests/template/deploymentconfig.yaml", "r") as stream:
