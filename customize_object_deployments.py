@@ -18,6 +18,7 @@
 """This script run in a pipeline task to customize Kuberneetes objects for deployment of an AI model."""
 
 import io
+import json
 import yaml
 import os
 import logging
@@ -37,56 +38,56 @@ IMAGE_URL = os.environ["PIPELINE_HELPERS_IMAGE_URL_DEPLOYMENT"]
 
 def customize_object_deployments() -> None:
     """Customize object for deployment."""
-    # with open("/workspace/pr/pr.json") as f:
-    #     pr_info = json.load(f)
+    with open("/workspace/pr/pr.json") as f:
+        pr_info = json.load(f)
 
-    # label = f'{pr_info["Base"]["Repo"]["FullName"]}-pr-{pr_info["Number"]}'
-    label = f'test-35'
+    label = f'{pr_info["Base"]["Repo"]["FullName"]}-pr-{pr_info["Number"]}'
 
     # Handle DC YAMLfile
-    with open("manifests/template/deploymentconfig.yaml", 'r') as stream:
+    with open("manifests/template/deploymentconfig.yaml", "r") as stream:
         dc_loaded = yaml.safe_load(stream)
 
     new_dc = dict(dc_loaded)
-    new_dc['metadata']['name'] = label
-    new_dc["spec"]['template']['spec']['containers'][0]['name'] = label
-    new_dc["spec"]['template']['spec']['containers'][0]['image'] = IMAGE_URL
-    new_dc["spec"]['template']['metadata']['labels']['component'] = label
+    new_dc["metadata"]["name"] = label
+    new_dc["spec"]["template"]["spec"]["containers"][0]["name"] = label
+    new_dc["spec"]["template"]["spec"]["containers"][0]["image"] = IMAGE_URL
+    new_dc["spec"]["template"]["metadata"]["labels"]["component"] = label
 
     _LOGGER.info(f"Updated Deployment Config: {new_dc}")
 
     # Write DC YAML file
-    with io.open('customized_deploymentconfig.yaml', 'w', encoding='utf8') as outfile:
+    with io.open("/workspace/repo/customized_deploymentconfig.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(new_dc, outfile, default_flow_style=False, allow_unicode=True)
 
     # Handle Route YAMLfile
-    with open("manifests/template/route.yaml", 'r') as stream:
+    with open("manifests/template/route.yaml", "r") as stream:
         route_loaded = yaml.safe_load(stream)
 
     new_route = dict(route_loaded)
-    new_route['metadata']['name'] = label
-    new_route['metadata']['labels']['component'] = label
-    new_route['metadata']['labels']['service'] = label
-    new_route['spec']['to']['name'] = label
+    new_route["metadata"]["name"] = label
+    new_route["metadata"]["labels"]["component"] = label
+    new_route["metadata"]["labels"]["service"] = label
+    new_route["spec"]["to"]["name"] = label
     _LOGGER.info(f"Updated Route: {new_route}")
 
     # Write Route YAML file
-    with io.open('customized_route.yaml', 'w', encoding='utf8') as outfile:
+    with io.open("/workspace/repo/customized_route.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(new_route, outfile, default_flow_style=False, allow_unicode=True)
 
     # Handle Servvice YAMLfile
-    with open("manifests/template/service.yaml", 'r') as stream:
+    with open("manifests/template/service.yaml", "r") as stream:
         service_loaded = yaml.safe_load(stream)
-    
+
     new_service = dict(service_loaded)
-    new_service['metadata']['name'] = label
-    new_service['metadata']['labels']['component'] = label
-    new_service['metadata']['labels']['service'] = label
+    new_service["metadata"]["name"] = label
+    new_service["metadata"]["labels"]["component"] = label
+    new_service["metadata"]["labels"]["service"] = label
     _LOGGER.info(f"Updated Service: {new_service}")
 
     # Write Route YAML file
-    with io.open('customized_service.yaml', 'w', encoding='utf8') as outfile:
+    with io.open("/workspace/repo/customized_service.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(new_service, outfile, default_flow_style=False, allow_unicode=True)
+
 
 if __name__ == "__main__":
     customize_object_deployments()
