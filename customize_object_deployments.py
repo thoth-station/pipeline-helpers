@@ -44,7 +44,7 @@ def customize_object_deployments() -> None:
     label = f'{pr_info["Base"]["Repo"]["FullName"]}-pr-{pr_info["Number"]}'
 
     # Handle DC YAMLfile
-    with open("manifests/template/deploymentconfig.yaml", "r") as stream:
+    with open("/opt/app-root/src/manifests/template/deploymentconfig.yaml", "r") as stream:
         dc_loaded = yaml.safe_load(stream)
 
     new_dc = dict(dc_loaded)
@@ -60,7 +60,7 @@ def customize_object_deployments() -> None:
         yaml.dump(new_dc, outfile, default_flow_style=False, allow_unicode=True)
 
     # Handle Route YAMLfile
-    with open("manifests/template/route.yaml", "r") as stream:
+    with open("/opt/app-root/src/manifests/template/route.yaml", "r") as stream:
         route_loaded = yaml.safe_load(stream)
 
     new_route = dict(route_loaded)
@@ -75,7 +75,7 @@ def customize_object_deployments() -> None:
         yaml.dump(new_route, outfile, default_flow_style=False, allow_unicode=True)
 
     # Handle Servvice YAMLfile
-    with open("manifests/template/service.yaml", "r") as stream:
+    with open("/opt/app-root/src/manifests/template/service.yaml", "r") as stream:
         service_loaded = yaml.safe_load(stream)
 
     new_service = dict(service_loaded)
