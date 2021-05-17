@@ -38,12 +38,11 @@ PR_FILE_PATH = os.getenv("PIPELINE_HELPERS_PR_FILE_PATH", "/workspace/pr/pr.json
 
 def post_process_metrics() -> None:
     """Post process gathered metrics on AI model deployed."""
-    ceph_adapter = connect_to_ceph(ceph_bucket_prefix="data")
-
     with open(PR_FILE_PATH) as f:
         pr_info = json.load(f)
 
     repo = pr_info["Base"]["Repo"]["FullName"]
+    repo = "thoth-station/elyra-aidevsecops-tutorial"
 
     ceph_adapter = connect_to_ceph(ceph_bucket_prefix="data", repo=repo)
     document_id = "processed_metrics"

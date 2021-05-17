@@ -31,11 +31,11 @@ else:
 _LOGGER = logging.getLogger("thoth.gather_metrics")
 
 
-def connect_to_ceph(ceph_bucket_prefix: str) -> CephStore:
+def connect_to_ceph(ceph_bucket_prefix: str, repo: str) -> CephStore:
     """Connect to Ceph to store deployment metrics for Thoth."""
     deployment_name = "aicoe-ci"
 
-    prefix = f"{ceph_bucket_prefix}/{deployment_name}/deployment-metrics"
+    prefix = f"{ceph_bucket_prefix}/{deployment_name}/deployment-metrics/{repo}"
     ceph = CephStore(prefix=prefix)
     ceph.connect()
     return ceph
