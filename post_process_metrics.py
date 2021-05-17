@@ -83,7 +83,7 @@ def post_process_metrics() -> None:
         report += "The following table shows gathered metrics on your deployed models."
         report += "\n\n" + df.to_markdown(index=False)
 
-        _LOGGER.info(f"PR comment is: {report}")
+        _LOGGER.info(f"PR comment is:\n{report}")
         pr_comment.write(report)
 
 
