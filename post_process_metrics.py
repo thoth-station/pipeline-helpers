@@ -21,7 +21,7 @@ import os
 import logging
 import json
 
-from thoth.pipeline_helpers.common import connect_to_ceph
+from thoth.pipeline_helpers.common import create_s3_adapter
 
 _DEBUG_LEVEL = bool(int(os.getenv("DEBUG_LEVEL", 0)))
 
@@ -44,7 +44,9 @@ def post_process_metrics() -> None:
     repo = pr_info["Base"]["Repo"]["FullName"]
     repo = "thoth-station/elyra-aidevsecops-tutorial"
 
-    ceph_adapter = connect_to_ceph(ceph_bucket_prefix="data", repo=repo)
+    ceph_adapter = create_s3_adapter(ceph_bucket_prefix="data", repo=repo)
+    ceph_adapter.connect()
+
     document_id = "processed_metrics"
 
     with open(METRICS_FILE_PATH) as f:
@@ -55,19 +57,26 @@ def post_process_metrics() -> None:
 
     _LOGGER.info(f"Document retrieval status: {document_exist}")
 
-    retrieved_data = []
+    metrics_data = {}
 
     if document_exist:
+        _LOGGER.info(f"Found data for {repo} in {document_id}!")
 
-        retrieved_data = ceph_adapter.retrieve_document(document_id)
-        _LOGGER.info(f"Retrieved data: {retrieved_data}")
+        metrics_data = ceph_adapter.retrieve_document(document_id)
+        _LOGGER.info(f"Retrieved data: {metrics_data}")
+    else:
+        _LOGGER.info(f"Did not find data for {repo} in {document_id}!")
 
-    retrieved_data.append(metrics)
+    metrics_data[metrics["model_version"]] = metrics
 
-    _LOGGER.info(f"Processed data to be stored: {retrieved_data}")
+    _LOGGER.info(f"Processed data to be stored: {metrics_data}")
 
+    # Store on ceph
+    ceph_adapter.store_document(metrics_data, document_id)
+
+    # Store locally for next step
     with open("processed_metrics.json", "w") as processed_metrics:
-        json.dump(retrieved_data, processed_metrics, indent=2)
+        json.dump(metrics_data, processed_metrics, indent=2)
 
 
 if __name__ == "__main__":
