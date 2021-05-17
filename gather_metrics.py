@@ -32,15 +32,21 @@ else:
 
 _LOGGER = logging.getLogger("thoth.gather_metrics")
 
-RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME", "test")
 METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_METRICS_FILE_PATH", "metrics.json")
+RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME")
 TEST_COMMAND = os.getenv("PIPELINE_HELPERS_TEST_COMMAND", "behave")
 
 
 def gather_metrics() -> None:
     """Gather metrics running a test script created by data scientist."""
-    # Install requirements.
-    args = [f"thamos install -r {RUNTIME_ENVIRONMENT_TEST}"]
+    # Install requirements from test overlay.
+    args_env = ""
+
+    if RUNTIME_ENVIRONMENT_TEST:
+        args_env = f" -r {RUNTIME_ENVIRONMENT_TEST}"
+
+    args = [f"thamos install{args_env}"]
+
     _LOGGER.info(f"Args to be used to install: {args}")
 
     try:
@@ -74,8 +80,6 @@ def gather_metrics() -> None:
             _LOGGER.error(f"Error loading metrics: {exc}")
             sys.exit(1)
         _LOGGER.info(f"Metrics collected are {stdout}")
-
-    # TODO: Store result to track changes?
 
 
 if __name__ == "__main__":

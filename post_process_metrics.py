@@ -38,7 +38,6 @@ PR_FILE_PATH = os.getenv("PIPELINE_HELPERS_PR_FILE_PATH", "/workspace/pr/pr.json
 
 def post_process_metrics() -> None:
     """Post process gathered metrics on AI model deployed."""
-
     ceph_adapter = connect_to_ceph(ceph_bucket_prefix="data")
 
     with open(PR_FILE_PATH) as f:
@@ -64,14 +63,12 @@ def post_process_metrics() -> None:
         retrieved_data = ceph_adapter.retrieve_document(document_id)
         _LOGGER.info(f"Retrieved data: {retrieved_data}")
 
-    retrieved_data.append(
-        metrics
-    )
+    retrieved_data.append(metrics)
 
     _LOGGER.info(f"Processed data to be stored: {retrieved_data}")
 
     with open("processed_metrics.json", "w") as processed_metrics:
-        json.dump(retrieved_data, processed_metrics, indent=2) 
+        json.dump(retrieved_data, processed_metrics, indent=2)
 
 
 if __name__ == "__main__":
