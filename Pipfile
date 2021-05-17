@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 thoth-storages = "*"
+pandas = "*"
 
 [dev-packages]
 pytest = "*"

@@ -21,6 +21,7 @@ import os
 import logging
 import json
 
+import pandas as pd
 from thoth.pipeline_helpers.common import create_s3_adapter
 
 _DEBUG_LEVEL = bool(int(os.getenv("DEBUG_LEVEL", 0)))
@@ -75,8 +76,15 @@ def post_process_metrics() -> None:
     ceph_adapter.store_document(metrics_data, document_id)
 
     # Store locally for next step
-    with open("processed_metrics.json", "w") as processed_metrics:
-        json.dump(metrics_data, processed_metrics, indent=2)
+    with open("pr-comment", "w") as pr_comment:
+        report = ""
+
+        df = pd.DataFrame([model_v for model_v in metrics_data.values()])
+        report += "The following table shows gathered metrics on your deployed models."
+        report += "\n\n" + df.to_markdown(index=False)
+
+        _LOGGER.info(f"PR comment is: {report}")
+        pr_comment.write(report)
 
 
 if __name__ == "__main__":
