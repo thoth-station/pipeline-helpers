@@ -1,0 +1,14 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: aicoe-gather-metrics-pipeline
+  labels:
+    service: aicoe-gather-metrics-pipeline
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    service: aicoe-gather-metrics-pipeline

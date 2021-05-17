@@ -32,8 +32,8 @@ else:
 
 _LOGGER = logging.getLogger("thoth.gather_metrics")
 
+RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME", "test")
 METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_METRICS_FILE_PATH", "metrics.json")
-RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME")
 TEST_COMMAND = os.getenv("PIPELINE_HELPERS_TEST_COMMAND", "behave")
 
 

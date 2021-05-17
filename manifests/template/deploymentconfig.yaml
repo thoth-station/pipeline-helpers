@@ -1,0 +1,50 @@
+---
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: aicoe-gather-metrics-pipeline
+spec:
+  replicas: 1
+  selector:
+    service: aicoe-gather-metrics-pipeline
+    app.kubernetes.io/name: thoth
+    app.kubernetes.io/component: aicoe-gather-metrics-pipeline
+    app.kubernetes.io/managed-by: aicoe-thoth-devops
+  template:
+    metadata:
+      labels:
+        service: aicoe-gather-metrics-pipeline
+        app.kubernetes.io/name: thoth
+        app.kubernetes.io/component: aicoe-gather-metrics-pipeline
+        app.kubernetes.io/managed-by: aicoe-thoth-devops
+    spec:
+      containers:
+        - name: aicoe-gather-metrics-pipeline
+          image: quay.io/thoth-station/elyra-aidevsecops-tutorial:v0.5.0
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              memory: "384Mi"
+              cpu: "2"
+            limits:
+              memory: "768Mi"
+              cpu: "2"
+          readinessProbe:
+            httpGet:
+              path: "/metrics"
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: "/metrics"
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            timeoutSeconds: 10
+  test: false

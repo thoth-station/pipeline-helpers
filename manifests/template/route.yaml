@@ -1,0 +1,11 @@
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: aicoe-gather-metrics-pipeline
+  labels:
+    service: aicoe-gather-metrics-pipeline
+spec:
+  to:
+    kind: Service
+    name: aicoe-gather-metrics-pipeline
