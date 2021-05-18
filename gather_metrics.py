@@ -32,8 +32,8 @@ else:
 
 _LOGGER = logging.getLogger("thoth.gather_metrics")
 
+RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME", "test")
 METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_METRICS_FILE_PATH", "metrics.json")
-RUNTIME_ENVIRONMENT_TEST = os.getenv("TEST_RUNTIME_ENVIRONMENT_NAME")
 TEST_COMMAND = os.getenv("PIPELINE_HELPERS_TEST_COMMAND", "behave")
 
 
@@ -65,11 +65,11 @@ def gather_metrics() -> None:
     _LOGGER.info(f"Executing command to gather metrics... {TEST_COMMAND}")
 
     try:
-        process_output = subprocess.run(TEST_COMMAND, shell=True, capture_output=True, check=True)
-        _LOGGER.info(f"Finished running test with: {process_output.stdout.decode('utf-8')}")
+        test_process_output = subprocess.run(TEST_COMMAND, shell=True, capture_output=True, check=True)
+        _LOGGER.info(f"Finished running test with: {test_process_output.stdout.decode('utf-8')}")
 
     except Exception:
-        _LOGGER.error("Error running test: %r", process_output.stderr.decode("utf-8"))
+        _LOGGER.error("Error running test: %r", test_process_output.stderr.decode("utf-8"))
         sys.exit(1)
 
     # Load metrics from file created by behave.

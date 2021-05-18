@@ -43,7 +43,6 @@ def post_process_metrics() -> None:
         pr_info = json.load(f)
 
     repo = pr_info["Base"]["Repo"]["FullName"]
-    repo = "thoth-station/elyra-aidevsecops-tutorial"
 
     ceph_adapter = create_s3_adapter(ceph_bucket_prefix="data", repo=repo)
     ceph_adapter.connect()
