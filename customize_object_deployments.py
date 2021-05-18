@@ -49,6 +49,8 @@ def customize_object_deployments() -> None:
 
     new_dc = dict(dc_loaded)
     new_dc["metadata"]["name"] = label
+    new_dc["metadata"]["labels"] = {}
+    new_dc["metadata"]["labels"]['component'] = label
     new_dc["spec"]["template"]["spec"]["containers"][0]["name"] = label
     new_dc["spec"]["template"]["spec"]["containers"][0]["image"] = IMAGE_URL
     new_dc["spec"]["template"]["metadata"]["labels"]["component"] = label
