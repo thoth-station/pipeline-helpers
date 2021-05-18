@@ -14,3 +14,11 @@ all the things that you see...
 ### Features
 * Adjust method (#4)
 * remove template
+
+## Release 0.3.0 (2021-05-18T18:12:35)
+### Features
+* Customize obejcts for AI model deployment (#15)
+* :arrow_up: Automatic update of dependencies by Kebechet (#17)
+* :hatched_chick: update the prow resource limits (#16)
+* Add post process metrics method for pipeline helpers (#14)
+* :arrow_up: Automatic update of dependencies by Kebechet (#11)
