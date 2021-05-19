@@ -22,3 +22,7 @@ all the things that you see...
 * :hatched_chick: update the prow resource limits (#16)
 * Add post process metrics method for pipeline helpers (#14)
 * :arrow_up: Automatic update of dependencies by Kebechet (#11)
+
+## Release 0.4.0 (2021-05-19T13:52:51)
+### Features
+* Add link to features test to collect metrics (#20)
