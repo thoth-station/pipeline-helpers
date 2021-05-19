@@ -35,7 +35,7 @@ _LOGGER = logging.getLogger("thoth.post_process_metrics")
 
 METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_METRICS_FILE_PATH", "metrics.json")
 PR_FILE_PATH = os.getenv("PIPELINE_HELPERS_PR_FILE_PATH", "/workspace/pr/pr.json")
-PR_REPO_URL = os.getenv("REPO_URL", "features")
+PR_REPO_URL = os.environ["REPO_URL"]
 
 def post_process_metrics() -> None:
     """Post process gathered metrics on AI model deployed."""
