@@ -35,7 +35,7 @@ _LOGGER = logging.getLogger("thoth.post_process_metrics")
 
 METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_METRICS_FILE_PATH", "metrics.json")
 PR_FILE_PATH = os.getenv("PIPELINE_HELPERS_PR_FILE_PATH", "/workspace/pr/pr.json")
-
+PR_REPO_URL = os.getenv("REPO_URL", "features")
 
 def post_process_metrics() -> None:
     """Post process gathered metrics on AI model deployed."""
@@ -80,6 +80,7 @@ def post_process_metrics() -> None:
 
         df = pd.DataFrame([model_v for model_v in metrics_data.values()])
         report += "The following table shows gathered metrics on your deployed models."
+        report += f"Test used to collect metrics can be found here {PR_REPO_URL}/features."
         report += "\n\n" + df.to_markdown(index=False)
 
         _LOGGER.info(f"PR comment is:\n{report}")
