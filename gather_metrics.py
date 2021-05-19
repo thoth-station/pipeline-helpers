@@ -65,8 +65,8 @@ def gather_metrics() -> None:
     _LOGGER.info(f"Executing command to gather metrics... {TEST_COMMAND}")
 
     try:
-        process_output = subprocess.run(TEST_COMMAND, shell=True, capture_output=True, check=True)
-        _LOGGER.info(f"Finished running test with: {process_output.stdout.decode('utf-8')}")
+        subprocess.run(TEST_COMMAND, shell=True, check=True)
+        _LOGGER.info(f"Finished running test successfully.")
 
     except Exception as exc:
         _LOGGER.error("Error running test: %r", exc)
