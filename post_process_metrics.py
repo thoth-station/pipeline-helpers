@@ -37,6 +37,7 @@ METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_METRICS_FILE_PATH", "metrics.jso
 PR_FILE_PATH = os.getenv("PIPELINE_HELPERS_PR_FILE_PATH", "/workspace/pr/pr.json")
 PR_REPO_URL = os.environ["REPO_URL"]
 
+
 def post_process_metrics() -> None:
     """Post process gathered metrics on AI model deployed."""
     with open(PR_FILE_PATH) as f:
