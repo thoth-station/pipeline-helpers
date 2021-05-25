@@ -81,6 +81,7 @@ def post_process_metrics() -> None:
 
         df = pd.DataFrame([model_v for model_v in metrics_data.values()])
         report += "The following table shows gathered metrics on your deployed models."
+        # TODO: Provide path to features from branch
         report += f"\nTest used to collect metrics can be found here {PR_REPO_URL}/tree/master/features."
         report += "\n\n" + df.to_markdown(index=False)
 
