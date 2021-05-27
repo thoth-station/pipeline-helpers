@@ -26,3 +26,7 @@ all the things that you see...
 ## Release 0.4.0 (2021-05-19T13:52:51)
 ### Features
 * Add link to features test to collect metrics (#20)
+
+## Release 0.4.1 (2021-05-27T09:58:37)
+### Bug Fixes
+* fix variable (#23)
