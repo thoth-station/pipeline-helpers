@@ -57,6 +57,7 @@ def customize_object_deployments() -> None:
 
     _LOGGER.info(f"Updated Deployment Config: {new_dc}")
 
+    # TODO: Handle cases with different S2i options
     # Write DC YAML file
     with io.open("/workspace/repo/customized_deploymentconfig.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(new_dc, outfile, default_flow_style=False, allow_unicode=True)
