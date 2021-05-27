@@ -65,11 +65,11 @@ def gather_metrics() -> None:
     _LOGGER.info(f"Executing command to gather metrics... {TEST_COMMAND}")
 
     try:
-        test_process_output = subprocess.run(TEST_COMMAND, shell=True, capture_output=True, check=True)
-        _LOGGER.info(f"Finished running test with: {test_process_output.stdout.decode('utf-8')}")
+        subprocess.run(TEST_COMMAND, shell=True, check=True)
+        _LOGGER.info("Finished running test successfully.")
 
-    except Exception:
-        _LOGGER.error("Error running test: %r", test_process_output.stderr.decode("utf-8"))
+    except Exception as exc:
+        _LOGGER.error("Error running test: %r", exc)
         sys.exit(1)
 
     # Load metrics from file created by behave.

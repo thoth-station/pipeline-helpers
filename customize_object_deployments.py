@@ -57,6 +57,7 @@ def customize_object_deployments() -> None:
 
     _LOGGER.info(f"Updated Deployment Config: {new_dc}")
 
+    # TODO: Handle cases with different S2i options
     # Write DC YAML file
     with io.open("/workspace/repo/customized_deploymentconfig.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(new_dc, outfile, default_flow_style=False, allow_unicode=True)
@@ -76,7 +77,7 @@ def customize_object_deployments() -> None:
     with io.open("/workspace/repo/customized_route.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(new_route, outfile, default_flow_style=False, allow_unicode=True)
 
-    # Handle Servvice YAMLfile
+    # Handle Service YAML file
     with open("/opt/app-root/src/manifests/template/service.yaml", "r") as stream:
         service_loaded = yaml.safe_load(stream)
 
