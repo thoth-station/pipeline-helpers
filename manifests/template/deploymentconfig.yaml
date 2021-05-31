@@ -21,9 +21,6 @@ spec:
       containers:
         - name: aicoe-gather-metrics-pipeline
           image: quay.io/thoth-station/elyra-aidevsecops-tutorial:v0.5.0
-          env:
-            - name: APP_MODULE
-              value: "wsgi:application"
           ports:
             - containerPort: 8080
               protocol: TCP
