@@ -70,7 +70,6 @@ def customize_object_deployments() -> None:
     new_route["metadata"]["name"] = label
     new_route["metadata"]["labels"]["component"] = label
     new_route["metadata"]["labels"]["service"] = label
-    new_route["spec"]["to"]["name"] = label
     _LOGGER.info(f"Updated Route: {new_route}")
 
     # Write Route YAML file
@@ -82,7 +81,6 @@ def customize_object_deployments() -> None:
         service_loaded = yaml.safe_load(stream)
 
     new_service = dict(service_loaded)
-    new_service["metadata"]["name"] = label
     new_service["metadata"]["labels"]["component"] = label
     new_service["metadata"]["labels"]["service"] = label
     _LOGGER.info(f"Updated Service: {new_service}")
