@@ -92,21 +92,21 @@ def post_process_metrics() -> None:
     with open("pr-comment", "w") as pr_comment:
         report = ""
 
-        report = "#AICoE CI results"
+        report += "#AICoE CI results"
 
-        report = "\n\n## Test inputs"
+        report += "\n\n## Test inputs"
         df_info = pd.DataFrame([info_metrics])
         report += "\n\nThe following table shows info about test used to gather metrics."
         report += "\n\n" + df_info.to_markdown(index=False)
 
-        report = "\n\n## Model and application metrics"
+        report += "\n\n## Model and application metrics"
         df_metrics = pd.DataFrame([metrics])
         report += "\n\nThe following table shows gathered metrics for model and application on your deployed models."
-        report += "\n\n" + df_metrics.T.to_markdown(index=False)
+        report += "\n\n" + df_metrics.to_markdown(index=False)
 
         df_platform = pd.DataFrame([platform_metrics])
         report += "\n\nThe following table shows gathered metrics from platform on your deployed models."
-        report += "\n\n" + df_platform.T.to_markdown(index=False)
+        report += "\n\n" + df_platform.to_markdown(index=False)
 
         _LOGGER.info(f"PR comment is:\n{report}")
         pr_comment.write(report)
