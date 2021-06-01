@@ -92,7 +92,7 @@ def post_process_metrics() -> None:
     with open("pr-comment", "w") as pr_comment:
         report = ""
 
-        report += "#AICoE CI results"
+        report += "# AICoE CI results"
 
         report += "\n\n## Test inputs"
         df_info = pd.DataFrame([info_metrics])
@@ -104,6 +104,7 @@ def post_process_metrics() -> None:
         report += "\n\nThe following table shows gathered metrics for model and application on your deployed models."
         report += "\n\n" + df_metrics.to_markdown(index=False)
 
+        report += "\n\n## Platform metrics"
         df_platform = pd.DataFrame([platform_metrics])
         report += "\n\nThe following table shows gathered metrics from platform on your deployed models."
         report += "\n\n" + df_platform.to_markdown(index=False)
