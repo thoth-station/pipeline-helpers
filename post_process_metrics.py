@@ -82,9 +82,9 @@ def post_process_metrics() -> None:
     }
 
     metrics_data[model_version] = {}
-    metrics_data[model_version][metrics["info_metrics"]] = info_metrics
-    metrics_data[model_version][metrics["model_application_metrics"]] = metrics
-    metrics_data[model_version][metrics["platform_metrics"]] = platform_metrics
+    metrics_data[model_version]["info_metrics"] = info_metrics
+    metrics_data[model_version]["model_application_metrics"] = metrics
+    metrics_data[model_version]["platform_metrics"] = platform_metrics
 
     _LOGGER.info(f"Processed data to be stored: {metrics_data}")
 
