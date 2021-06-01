@@ -52,6 +52,7 @@ def customize_object_deployments() -> None:
     new_dc["metadata"]["labels"] = {}
     new_dc["metadata"]["labels"]["service"] = label
     new_dc["spec"]["template"]["spec"]["containers"][0]["name"] = label
+    new_dc["spec"]["template"]["metadata"]["labels"]["service"] = label
     new_dc["spec"]["template"]["spec"]["containers"][0]["image"] = IMAGE_URL
     new_dc["spec"]["selector"]["service"] = label
 
