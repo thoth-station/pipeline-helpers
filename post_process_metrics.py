@@ -34,6 +34,7 @@ else:
 _LOGGER = logging.getLogger("thoth.post_process_metrics")
 
 METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_METRICS_FILE_PATH", "metrics.json")
+PLATFORM_METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_PLATFORM_METRICS_FILE_PATH", "platform_metrics.json")
 PR_FILE_PATH = os.getenv("PIPELINE_HELPERS_PR_FILE_PATH", "/workspace/pr/pr.json")
 PR_REPO_URL = os.environ["REPO_URL"]
 PR_COMMIT_SHA = os.environ["COMMIT_SHA"]
@@ -50,15 +51,21 @@ def post_process_metrics() -> None:
     ceph_adapter.connect()
 
     document_id = "processed_metrics"
+    model_version = f"pr-{pr_info['Number']}"
 
     with open(METRICS_FILE_PATH) as f:
         metrics = json.load(f)
-        metrics["model_version"] = f"pr-{pr_info['Number']}"
+        metrics["model_version"] = model_version
 
+    # Platform metrics
+    with open(PLATFORM_METRICS_FILE_PATH) as f:
+        platform_metrics = json.load(f)
+
+    # Check if document exists
     document_exist = ceph_adapter.document_exists(document_id=document_id)
-
     _LOGGER.info(f"Document retrieval status: {document_exist}")
 
+    # All metrics
     metrics_data = {}
 
     if document_exist:
@@ -69,7 +76,15 @@ def post_process_metrics() -> None:
     else:
         _LOGGER.info(f"Did not find data for {repo} in {document_id}!")
 
-    metrics_data[metrics["model_version"]] = metrics
+    info_metrics = {
+        "test URL": f"{PR_REPO_URL}/blob/{PR_COMMIT_SHA}/features",
+        "namespace deployment": "aicoe-ci"
+    }
+
+    metrics_data[model_version] = {}
+    metrics_data[model_version][metrics["info_metrics"]] = info_metrics
+    metrics_data[model_version][metrics["model_application_metrics"]] = metrics
+    metrics_data[model_version][metrics["platform_metrics"]] = platform_metrics
 
     _LOGGER.info(f"Processed data to be stored: {metrics_data}")
 
@@ -80,10 +95,21 @@ def post_process_metrics() -> None:
     with open("pr-comment", "w") as pr_comment:
         report = ""
 
-        df = pd.DataFrame([model_v for model_v in metrics_data.values()])
-        report += "The following table shows gathered metrics on your deployed models."
-        report += f"\nTest used to collect metrics can be found here {PR_REPO_URL}/blob/{PR_COMMIT_SHA}/features."
-        report += "\n\n" + df.to_markdown(index=False)
+        report = "#AICoE CI results"
+
+        report = "\n\n## Test inputs"
+        df_info = pd.DataFrame([info_metrics])
+        report += "\n\nThe following table shows info about test used to gather metrics."
+        report += "\n\n" + df_info.to_markdown(index=False)
+
+        report = "\n\n## Model and application metrics"
+        df_metrics = pd.DataFrame([metrics])
+        report += "\n\nThe following table shows gathered metrics for model and application on your deployed models."
+        report += "\n\n" + df_metrics.T.to_markdown(index=False)
+
+        df_platform = pd.DataFrame([platform_metrics])
+        report += "\n\nThe following table shows gathered metrics from platform on your deployed models."
+        report += "\n\n" + df_platform.T.to_markdown(index=False)
 
         _LOGGER.info(f"PR comment is:\n{report}")
         pr_comment.write(report)
