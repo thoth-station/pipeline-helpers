@@ -5,6 +5,9 @@ metadata:
   name: aicoe-gather-metrics-pipeline
   labels:
     service: aicoe-gather-metrics-pipeline
+    app.kubernetes.io/name: thoth
+    app.kubernetes.io/component: aicoe-gather-metrics-pipeline
+    app.kubernetes.io/managed-by: aicoe-thoth-devops
 spec:
   to:
     kind: Service
