@@ -30,3 +30,20 @@ all the things that you see...
 ## Release 0.4.1 (2021-05-27T09:58:37)
 ### Bug Fixes
 * fix variable (#23)
+
+## Release 0.5.0 (2021-06-02T13:35:50)
+### Features
+* Add missing line in report
+* sum all lines
+* Adjust keys
+* add missing label
+* Split metrics in comment
+* adjust customization
+* Add labels
+* Split metrics
+* :arrow_up: Automatic update of dependencies by Kebechet (#27)
+### Improvements
+* make pre-commit happy
+* make test env optional
+### Other
+* remove spec
