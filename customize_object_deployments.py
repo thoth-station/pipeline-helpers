@@ -50,10 +50,11 @@ def customize_object_deployments() -> None:
     new_dc = dict(dc_loaded)
     new_dc["metadata"]["name"] = label
     new_dc["metadata"]["labels"] = {}
-    new_dc["metadata"]["labels"]["component"] = label
+    new_dc["metadata"]["labels"]["service"] = label
     new_dc["spec"]["template"]["spec"]["containers"][0]["name"] = label
+    new_dc["spec"]["template"]["metadata"]["labels"]["service"] = label
     new_dc["spec"]["template"]["spec"]["containers"][0]["image"] = IMAGE_URL
-    new_dc["spec"]["template"]["metadata"]["labels"]["component"] = label
+    new_dc["spec"]["selector"]["service"] = label
 
     _LOGGER.info(f"Updated Deployment Config: {new_dc}")
 
@@ -68,7 +69,6 @@ def customize_object_deployments() -> None:
 
     new_route = dict(route_loaded)
     new_route["metadata"]["name"] = label
-    new_route["metadata"]["labels"]["component"] = label
     new_route["metadata"]["labels"]["service"] = label
     new_route["spec"]["to"]["name"] = label
     _LOGGER.info(f"Updated Route: {new_route}")
@@ -83,8 +83,8 @@ def customize_object_deployments() -> None:
 
     new_service = dict(service_loaded)
     new_service["metadata"]["name"] = label
-    new_service["metadata"]["labels"]["component"] = label
     new_service["metadata"]["labels"]["service"] = label
+    new_service["spec"]["selector"]["service"] = label
     _LOGGER.info(f"Updated Service: {new_service}")
 
     # Write Route YAML file
