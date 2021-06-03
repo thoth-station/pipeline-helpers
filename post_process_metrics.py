@@ -79,7 +79,7 @@ def post_process_metrics() -> None:
 
     info_metrics = {
         "test URL": f"{PR_REPO_URL}/blob/{PR_COMMIT_SHA}/features",
-        "namespace deployment": NAMESPACE_MODEL_DEPLOYMENT
+        "namespace deployment": NAMESPACE_MODEL_DEPLOYMENT,
     }
 
     metrics_data[model_version] = {}
