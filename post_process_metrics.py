@@ -38,6 +38,7 @@ PLATFORM_METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_PLATFORM_METRICS_FILE_P
 PR_FILE_PATH = os.getenv("PIPELINE_HELPERS_PR_FILE_PATH", "/workspace/pr/pr.json")
 PR_REPO_URL = os.environ["REPO_URL"]
 PR_COMMIT_SHA = os.environ["COMMIT_SHA"]
+NAMESPACE_MODEL_DEPLOYMENT = os.environ["PIPELINE_NAMESPACE_MODEL_DEPLOYMENT"]
 
 
 def post_process_metrics() -> None:
@@ -76,7 +77,10 @@ def post_process_metrics() -> None:
     else:
         _LOGGER.info(f"Did not find data for {repo} in {document_id}!")
 
-    info_metrics = {"test URL": f"{PR_REPO_URL}/blob/{PR_COMMIT_SHA}/features", "namespace deployment": "aicoe-ci"}
+    info_metrics = {
+        "test URL": f"{PR_REPO_URL}/blob/{PR_COMMIT_SHA}/features",
+        "namespace deployment": NAMESPACE_MODEL_DEPLOYMENT,
+    }
 
     metrics_data[model_version] = {}
     metrics_data[model_version]["info_metrics"] = info_metrics
