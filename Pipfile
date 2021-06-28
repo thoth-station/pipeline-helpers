@@ -7,6 +7,7 @@ name = "pypi"
 thoth-storages = "*"
 pandas = "*"
 tabulate = "*"
+prometheus-api-client = "*"
 
 [dev-packages]
 pytest = "*"
