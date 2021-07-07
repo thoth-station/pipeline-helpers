@@ -33,6 +33,7 @@ else:
 
 _LOGGER = logging.getLogger("thoth.post_process_metrics")
 
+DEPLOYMENT_NAMESPACE = os.getenv("PIPELINE_HELPERS_DEPLOYMENT_NAMESPACE", "aicoe-ci")
 METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_METRICS_FILE_PATH", "metrics.json")
 PLATFORM_METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_PLATFORM_METRICS_FILE_PATH", "platform_metrics.json")
 PR_FILE_PATH = os.getenv("PIPELINE_HELPERS_PR_FILE_PATH", "/workspace/pr/pr.json")
@@ -79,7 +80,7 @@ def post_process_metrics() -> None:
 
     info_metrics = {
         "test URL": f"{PR_REPO_URL}/blob/{PR_COMMIT_SHA}/features",
-        "namespace deployment": NAMESPACE_MODEL_DEPLOYMENT,
+        "namespace deployment": DEPLOYMENT_NAMESPACE,
     }
 
     metrics_data[model_version] = {}
