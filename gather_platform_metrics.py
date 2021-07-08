@@ -20,8 +20,7 @@
 import os
 import logging
 import json
-import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from prometheus_api_client import PrometheusConnect
 
@@ -67,9 +66,7 @@ def gather_platform_metrics() -> None:
     _LOGGER.info("Considering pod name %r", POD_NAME)
 
     # Memory usage
-    query_labels = (
-        f'{{namespace="{DEPLOYMENT_NAMESPACE}", container!="", pod="{POD_NAME}"}}'
-    )
+    query_labels = f'{{namespace="{DEPLOYMENT_NAMESPACE}", container!="", pod="{POD_NAME}"}}'
     query = f"sum(container_memory_working_set_bytes{query_labels}) by (pod)"
     memory_usage = pc.custom_query_range(  # type: ignore
         query=query,
@@ -80,10 +77,8 @@ def gather_platform_metrics() -> None:
     _LOGGER.info("Memory Usage %r", memory_usage)
 
     # CPU usage
-    query_labels = (
-        f'{{namespace="{DEPLOYMENT_NAMESPACE}", pod="{POD_NAME}"}}'
-    )
-    query = F"sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{query_labels}) by (pod)"
+    query_labels = f'{{namespace="{DEPLOYMENT_NAMESPACE}", pod="{POD_NAME}"}}'
+    query = f"sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{query_labels}) by (pod)"
     cpu_usage = pc.custom_query_range(  # type: ignore
         query=query,
         start_time=start,
@@ -93,9 +88,12 @@ def gather_platform_metrics() -> None:
     _LOGGER.info("CPU Usage %r", cpu_usage)
 
     if memory_usage and cpu_usage:
-        memory_usage_vector = [float(v[1])/1000000 for v in memory_usage[0]["values"] if float(v[1]) > 0]  # in MB
+        memory_usage_vector = [float(v[1]) / 1000000 for v in memory_usage[0]["values"] if float(v[1]) > 0]  # in MB
         cpu_usage_vector = [float(v[1]) for v in cpu_usage[0]["values"] if float(v[1]) > 0]
-        metric_data = {"CPU max usage": round(max(cpu_usage_vector), 4), "Memory max usage": f"{round(max(memory_usage_vector))}Mi"}
+        metric_data = {
+            "CPU max usage": round(max(cpu_usage_vector), 4),
+            "Memory max usage": f"{round(max(memory_usage_vector))}Mi",
+        }
     else:
         metric_data = {"CPU max usage": "N/A", "Memory max usage": "N/A"}
 
@@ -104,7 +102,6 @@ def gather_platform_metrics() -> None:
     # Store platform metrics.
     with open(PLATFORM_METRICS_FILE_PATH, "w") as stdout_file:
         json.dump(metric_data, stdout_file)
-
 
 
 if __name__ == "__main__":
