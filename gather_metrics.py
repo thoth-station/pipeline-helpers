@@ -87,10 +87,10 @@ def gather_metrics() -> None:
 
     # Store timestamps for platform metrics.
     with open("/tekton/results/gather_timestamp_started", "w") as result_start:
-        result_start.write(datetime.timestamp(start))
+        result_start.write(json.dumps(datetime.timestamp(start)))
 
     with open("/tekton/results/gather_timestamp_ended", "w") as result_end:
-        result_end.write(datetime.timestamp(end))
+        result_end.write(json.dumps(datetime.timestamp(end)))
 
 
 if __name__ == "__main__":
