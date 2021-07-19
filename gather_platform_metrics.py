@@ -66,7 +66,7 @@ def gather_platform_metrics() -> None:
     _LOGGER.info("Considering pod name %r", POD_NAME)
 
     # Memory usage
-    query_labels = f'{{namespace="{DEPLOYMENT_NAMESPACE}", container!="", pod="{POD_NAME}"}}'
+    query_labels = f'{{namespace="{DEPLOYMENT_NAMESPACE}", container!="prometheus-proxy", pod="{POD_NAME}"}}'
     query = f"sum(container_memory_working_set_bytes{query_labels}) by (pod)"
     memory_usage = pc.custom_query_range(  # type: ignore
         query=query,
@@ -77,7 +77,7 @@ def gather_platform_metrics() -> None:
     _LOGGER.info("Memory Usage %r", memory_usage)
 
     # CPU usage
-    query_labels = f'{{namespace="{DEPLOYMENT_NAMESPACE}", pod="{POD_NAME}"}}'
+    query_labels = f'{{namespace="{DEPLOYMENT_NAMESPACE}", container!="prometheus-proxy", pod="{POD_NAME}"}}'
     query = f"sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{query_labels}) by (pod)"
     cpu_usage = pc.custom_query_range(  # type: ignore
         query=query,
