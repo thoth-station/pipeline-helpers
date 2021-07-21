@@ -23,6 +23,8 @@ import json
 import sys
 import subprocess
 
+from datetime import datetime
+
 _DEBUG_LEVEL = bool(int(os.getenv("DEBUG_LEVEL", 0)))
 
 if _DEBUG_LEVEL:
@@ -65,8 +67,10 @@ def gather_metrics() -> None:
     _LOGGER.info(f"Executing command to gather metrics... {TEST_COMMAND}")
 
     try:
+        start = datetime.utcnow()
         subprocess.run(TEST_COMMAND, shell=True, check=True)
         _LOGGER.info("Finished running test successfully.")
+        end = datetime.utcnow()
 
     except Exception as exc:
         _LOGGER.error("Error running test: %r", exc)
@@ -80,6 +84,13 @@ def gather_metrics() -> None:
             _LOGGER.error(f"Error loading metrics: {exc}")
             sys.exit(1)
         _LOGGER.info(f"Metrics collected are {stdout}")
+
+    # Store timestamps for platform metrics.
+    with open("/tekton/results/gather_timestamp_started", "w") as result_start:
+        result_start.write(json.dumps(datetime.timestamp(start)))
+
+    with open("/tekton/results/gather_timestamp_ended", "w") as result_end:
+        result_end.write(json.dumps(datetime.timestamp(end)))
 
 
 if __name__ == "__main__":
