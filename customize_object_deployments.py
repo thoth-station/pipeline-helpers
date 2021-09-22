@@ -34,6 +34,7 @@ else:
 _LOGGER = logging.getLogger("thoth.customize_object_deployments")
 
 IMAGE_URL = os.environ["PIPELINE_HELPERS_IMAGE_URL_DEPLOYMENT"]
+DEPLOYMENT_NAME = os.environ["PIPELINE_HELPERS_DEPLOYMENT_NAME"]
 
 
 def customize_object_deployments() -> None:
@@ -41,7 +42,7 @@ def customize_object_deployments() -> None:
     with open("/workspace/pr/pr.json") as f:
         pr_info = json.load(f)
 
-    label = f'{pr_info["Base"]["Repo"]["Name"]}-pr-{pr_info["Number"]}'
+    label = f'{pr_info["Base"]["Repo"]["Name"]}-pr-{pr_info["Number"]}-gather-{DEPLOYMENT_NAME}'
 
     # Handle DC YAMLfile
     with open("/opt/app-root/src/manifests/template/deploymentconfig.yaml", "r") as stream:
