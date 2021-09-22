@@ -23,6 +23,8 @@ import yaml
 import os
 import logging
 
+from pathlib import Path
+
 
 _DEBUG_LEVEL = bool(int(os.getenv("DEBUG_LEVEL", 0)))
 
@@ -34,23 +36,27 @@ else:
 _LOGGER = logging.getLogger("thoth.customize_object_deployments")
 
 IMAGE_URL = os.environ["PIPELINE_HELPERS_IMAGE_URL_DEPLOYMENT"]
-DEPLOYMENT_NAME = os.environ["PIPELINE_HELPERS_DEPLOYMENT_NAME"]
+OVERLAY_NAME = os.environ["PIPELINE_HELPERS_OVERLAY_NAME"]
 DEPLOYMENT_CONFIG_NAME = os.getenv("PIPELINE_HELPERS_DEPLOYMENT_CONFIG_NAME", "deploymentconfig.yaml")
 
 
 def _customize_deployment_config(label: str) -> None:
     """Customize DeploymentConfig."""
-    with open(f"/opt/app-root/src/manifests/template/{DEPLOYMENT_CONFIG_NAME}", "r") as stream:
+    path_manifests = Path.cwd().joinpath("manifests")
+    path_overlays = path_manifests.joinpath("overlays")
+    path_dc = path_overlays.joinpath(DEPLOYMENT_CONFIG_NAME)
+
+    with open(path_dc, "r") as stream:
         dc_loaded = yaml.safe_load(stream)
 
     new_dc = dict(dc_loaded)
+    new_dc["spec"]["selector"]["service"] = label
     new_dc["metadata"]["name"] = label
     new_dc["metadata"]["labels"] = {}
     new_dc["metadata"]["labels"]["service"] = label
     new_dc["spec"]["template"]["spec"]["containers"][0]["name"] = label
     new_dc["spec"]["template"]["metadata"]["labels"]["service"] = label
     new_dc["spec"]["template"]["spec"]["containers"][0]["image"] = IMAGE_URL
-    new_dc["spec"]["selector"]["service"] = label
 
     _LOGGER.info(f"Updated Deployment Config: {new_dc}")
 
@@ -97,13 +103,13 @@ def customize_manifests() -> None:
     with open("/workspace/pr/pr.json") as f:
         pr_info = json.load(f)
 
-    label = f'{pr_info["Base"]["Repo"]["Name"]}-pr-{pr_info["Number"]}-gather-{DEPLOYMENT_NAME}'
+    label = f'{pr_info["Base"]["Repo"]["Name"]}-pr-{pr_info["Number"]}-gather-{OVERLAY_NAME}'
 
     # Handle DC
     _customize_deployment_config(label=label)
 
     # Handle Route YAMLfile
-    _customize_route(label=label) 
+    _customize_route(label=label)
 
     # Handle Service YAML file
     _customize_service(label=label)

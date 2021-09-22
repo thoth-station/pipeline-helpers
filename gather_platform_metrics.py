@@ -33,9 +33,6 @@ else:
 
 _LOGGER = logging.getLogger("thoth.gather_platform_metrics")
 
-PROCESS_START = int(os.environ["PIPELINE_HELPERS_PROCESS_START_TIMESTAMP"])
-PROCESS_END = int(os.environ["PIPELINE_HELPERS_PROCESS_END_TIMESTAMP"])
-
 THANOS_ENDPOINT = os.environ["THANOS_ENDPOINT"]
 THANOS_ACCESS_TOKEN = os.environ["THANOS_ACCESS_TOKEN"]
 
@@ -53,48 +50,56 @@ def gather_platform_metrics() -> None:
     )
 
     is_connected = pc.check_prometheus_connection()
-    if not is_connected:
-        raise Exception("Pipeline is not able to gather metrics from platform")
 
-    start = datetime.fromtimestamp(PROCESS_START)
-    end = datetime.fromtimestamp(PROCESS_END)
+    if is_connected:
+        # Store timestamps for platform metrics.
+        with open("/tekton/results/gather_timestamp_started", "r") as result_start:
+            starttime = json.load(result_start)
+            start = datetime.fromtimestamp(starttime)
 
-    _LOGGER.info("Start time %r", start)
-    _LOGGER.info("End time %r", end)
+        with open("/tekton/results/gather_timestamp_ended", "r") as result_end:
+            endtime = json.load(result_end)
+            end = datetime.fromtimestamp(endtime)
 
-    _LOGGER.info("Considering namespace %r", DEPLOYMENT_NAMESPACE)
-    _LOGGER.info("Considering pod name %r", POD_NAME)
+        _LOGGER.info("Start time %r", start)
+        _LOGGER.info("End time %r", end)
 
-    # Memory usage
-    query_labels = f'{{namespace="{DEPLOYMENT_NAMESPACE}", container!="prometheus-proxy", pod="{POD_NAME}"}}'
-    query = f"sum(container_memory_working_set_bytes{query_labels}) by (pod)"
-    memory_usage = pc.custom_query_range(  # type: ignore
-        query=query,
-        start_time=start,
-        end_time=end,
-        step="1h",
-    )
-    _LOGGER.info("Memory Usage %r", memory_usage)
+        _LOGGER.info("Considering namespace %r", DEPLOYMENT_NAMESPACE)
+        _LOGGER.info("Considering pod name %r", POD_NAME)
 
-    # CPU usage
-    query_labels = f'{{namespace="{DEPLOYMENT_NAMESPACE}", container!="prometheus-proxy", pod="{POD_NAME}"}}'
-    query = f"sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{query_labels}) by (pod)"
-    cpu_usage = pc.custom_query_range(  # type: ignore
-        query=query,
-        start_time=start,
-        end_time=end,
-        step="1h",
-    )
-    _LOGGER.info("CPU Usage %r", cpu_usage)
+        # Memory usage
+        query_labels = f'{{namespace="{DEPLOYMENT_NAMESPACE}", container!="prometheus-proxy", pod="{POD_NAME}"}}'
+        query = f"sum(container_memory_working_set_bytes{query_labels}) by (pod)"
+        memory_usage = pc.custom_query_range(  # type: ignore
+            query=query,
+            start_time=start,
+            end_time=end,
+            step="1h",
+        )
+        _LOGGER.info("Memory Usage %r", memory_usage)
 
-    if memory_usage and cpu_usage:
-        memory_usage_vector = [float(v[1]) / 1000000 for v in memory_usage[0]["values"] if float(v[1]) > 0]  # in MB
-        cpu_usage_vector = [float(v[1]) for v in cpu_usage[0]["values"] if float(v[1]) > 0]
-        metric_data = {
-            "CPU max usage": round(max(cpu_usage_vector), 4),
-            "Memory max usage": f"{round(max(memory_usage_vector))}Mi",
-        }
+        # CPU usage
+        query_labels = f'{{namespace="{DEPLOYMENT_NAMESPACE}", container!="prometheus-proxy", pod="{POD_NAME}"}}'
+        query = f"sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{query_labels}) by (pod)"
+        cpu_usage = pc.custom_query_range(  # type: ignore
+            query=query,
+            start_time=start,
+            end_time=end,
+            step="1h",
+        )
+        _LOGGER.info("CPU Usage %r", cpu_usage)
+
+        if memory_usage and cpu_usage:
+            memory_usage_vector = [float(v[1]) / 1000000 for v in memory_usage[0]["values"] if float(v[1]) > 0]  # in MB
+            cpu_usage_vector = [float(v[1]) for v in cpu_usage[0]["values"] if float(v[1]) > 0]
+            metric_data = {
+                "CPU max usage": round(max(cpu_usage_vector), 4),
+                "Memory max usage": f"{round(max(memory_usage_vector))}Mi",
+            }
+        else:
+            metric_data = {"CPU max usage": "N/A", "Memory max usage": "N/A"}
     else:
+        _LOGGER.warning("Pipeline is not able to gather metrics from platform!")
         metric_data = {"CPU max usage": "N/A", "Memory max usage": "N/A"}
 
     _LOGGER.info("Platform metrics: %r", metric_data)

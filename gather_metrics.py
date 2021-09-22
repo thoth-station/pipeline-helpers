@@ -36,7 +36,8 @@ _LOGGER = logging.getLogger("thoth.gather_metrics")
 
 RUNTIME_ENVIRONMENT_TEST = os.getenv("PIPELINE_HELPERS_TEST_RUNTIME_ENVIRONMENT_NAME")
 METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_METRICS_FILE_PATH", "metrics.json")
-TEST_COMMAND = os.getenv("PIPELINE_HELPERS_TEST_COMMAND", "behave")
+TEST_TYPE = os.getenv("PIPELINE_HELPERS_TEST_TYPE", "behave")
+TEST_NAME = os.environ["PIPELINE_HELPERS_TEST_NAME"]
 
 
 def gather_metrics() -> None:
@@ -64,11 +65,12 @@ def gather_metrics() -> None:
         sys.exit(1)
 
     # Execute the supplied script.
-    _LOGGER.info(f"Executing command to gather metrics... {TEST_COMMAND}")
+    test_command = f"{TEST_TYPE} -i {TEST_NAME}"
+    _LOGGER.info(f"Executing command to gather metrics... {test_command}")
 
     try:
         start = datetime.utcnow()
-        subprocess.run(TEST_COMMAND, shell=True, check=True)
+        subprocess.run(test_command, shell=True, check=True)
         _LOGGER.info("Finished running test successfully.")
         end = datetime.utcnow()
 
