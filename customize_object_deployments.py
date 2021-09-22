@@ -35,17 +35,12 @@ _LOGGER = logging.getLogger("thoth.customize_object_deployments")
 
 IMAGE_URL = os.environ["PIPELINE_HELPERS_IMAGE_URL_DEPLOYMENT"]
 DEPLOYMENT_NAME = os.environ["PIPELINE_HELPERS_DEPLOYMENT_NAME"]
+DEPLOYMENT_CONFIG_NAME = os.getenv("PIPELINE_HELPERS_DEPLOYMENT_CONFIG_NAME", "deploymentconfig.yaml")
 
 
-def customize_object_deployments() -> None:
-    """Customize object for deployment."""
-    with open("/workspace/pr/pr.json") as f:
-        pr_info = json.load(f)
-
-    label = f'{pr_info["Base"]["Repo"]["Name"]}-pr-{pr_info["Number"]}-gather-{DEPLOYMENT_NAME}'
-
-    # Handle DC YAMLfile
-    with open("/opt/app-root/src/manifests/template/deploymentconfig.yaml", "r") as stream:
+def _customize_deployment_config(label: str) -> None:
+    """Customize DeploymentConfig."""
+    with open(f"/opt/app-root/src/manifests/template/{DEPLOYMENT_CONFIG_NAME}", "r") as stream:
         dc_loaded = yaml.safe_load(stream)
 
     new_dc = dict(dc_loaded)
@@ -64,7 +59,9 @@ def customize_object_deployments() -> None:
     with io.open("/workspace/repo/customized_deploymentconfig.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(new_dc, outfile, default_flow_style=False, allow_unicode=True)
 
-    # Handle Route YAMLfile
+
+def _customize_route(label: str) -> None:
+    """Customize Route."""
     with open("/opt/app-root/src/manifests/template/route.yaml", "r") as stream:
         route_loaded = yaml.safe_load(stream)
 
@@ -78,7 +75,9 @@ def customize_object_deployments() -> None:
     with io.open("/workspace/repo/customized_route.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(new_route, outfile, default_flow_style=False, allow_unicode=True)
 
-    # Handle Service YAML file
+
+def _customize_service(label: str) -> None:
+    """Customize Service."""
     with open("/opt/app-root/src/manifests/template/service.yaml", "r") as stream:
         service_loaded = yaml.safe_load(stream)
 
@@ -88,10 +87,27 @@ def customize_object_deployments() -> None:
     new_service["spec"]["selector"]["service"] = label
     _LOGGER.info(f"Updated Service: {new_service}")
 
-    # Write Route YAML file
+    # Write Service YAML file
     with io.open("/workspace/repo/customized_service.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(new_service, outfile, default_flow_style=False, allow_unicode=True)
 
 
+def customize_manifests() -> None:
+    """Customize manifests for deployment of the application."""
+    with open("/workspace/pr/pr.json") as f:
+        pr_info = json.load(f)
+
+    label = f'{pr_info["Base"]["Repo"]["Name"]}-pr-{pr_info["Number"]}-gather-{DEPLOYMENT_NAME}'
+
+    # Handle DC
+    _customize_deployment_config(label=label)
+
+    # Handle Route YAMLfile
+    _customize_route(label=label) 
+
+    # Handle Service YAML file
+    _customize_service(label=label)
+
+
 if __name__ == "__main__":
-    customize_object_deployments()
+    customize_manifests()
