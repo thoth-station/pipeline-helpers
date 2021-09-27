@@ -49,9 +49,6 @@ def post_process_metrics() -> None:
 
     repo = pr_info["Base"]["Repo"]["FullName"]
 
-    ceph_adapter = create_s3_adapter(ceph_bucket_prefix="data", repo=repo)
-    ceph_adapter.connect()
-
     document_id = "processed_metrics"
     model_version = f"pr-{pr_info['Number']}"
 
@@ -63,9 +60,20 @@ def post_process_metrics() -> None:
     with open(PLATFORM_METRICS_FILE_PATH) as f:
         platform_metrics = json.load(f)
 
-    # Check if document exists
-    document_exist = ceph_adapter.document_exists(document_id=document_id)
-    _LOGGER.info(f"Document retrieval status: {document_exist}")
+    try:
+        ceph_adapter = create_s3_adapter(ceph_bucket_prefix="data", repo=repo)
+        ceph_adapter.connect()
+        is_connected = True
+    except Exception as exc:
+        _LOGGER.warning(exc)
+        is_connected = False
+
+    document_exist = False
+
+    if is_connected:
+        # Check if document exists
+        document_exist = ceph_adapter.document_exists(document_id=document_id)
+        _LOGGER.info(f"Document retrieval status: {document_exist}")
 
     # All metrics
     metrics_data = {}
@@ -91,7 +99,8 @@ def post_process_metrics() -> None:
     _LOGGER.info(f"Processed data to be stored: {metrics_data}")
 
     # Store on ceph
-    ceph_adapter.store_document(metrics_data, document_id)
+    if is_connected:
+        ceph_adapter.store_document(metrics_data, document_id)
 
     # Store locally for next step
     with open("pr-comment", "w") as pr_comment:
