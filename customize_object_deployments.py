@@ -43,8 +43,13 @@ DEPLOYMENT_CONFIG_NAME = os.getenv("PIPELINE_HELPERS_DEPLOYMENT_CONFIG_NAME", "d
 def _customize_deployment_config(label: str) -> None:
     """Customize DeploymentConfig."""
     path_manifests = Path.cwd().joinpath("manifests")
-    path_overlays = path_manifests.joinpath("overlays")
-    path_dc = path_overlays.joinpath(DEPLOYMENT_CONFIG_NAME)
+
+    if OVERLAY_NAME:
+        path_overlays = path_manifests.joinpath("overlays")
+        path_dc = path_overlays.joinpath(OVERLAY_NAME).joinpath(DEPLOYMENT_CONFIG_NAME)
+    else:
+        # Use default one for single deployment
+        path_dc = Path(f"/opt/app-root/src/manifests/template/{DEPLOYMENT_CONFIG_NAME}")
 
     with open(path_dc, "r") as stream:
         dc_loaded = yaml.safe_load(stream)
