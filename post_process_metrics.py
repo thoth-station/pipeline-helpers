@@ -40,6 +40,7 @@ PR_FILE_PATH = os.getenv("PIPELINE_HELPERS_PR_FILE_PATH", "/workspace/pr/pr.json
 PR_REPO_URL = os.environ["REPO_URL"]
 PR_COMMIT_SHA = os.environ["COMMIT_SHA"]
 NAMESPACE_MODEL_DEPLOYMENT = os.environ["PIPELINE_NAMESPACE_MODEL_DEPLOYMENT"]
+OVERLAY_NAME = os.environ["PIPELINE_HELPERS_OVERLAY_NAME"]
 
 
 def post_process_metrics() -> None:
@@ -51,6 +52,9 @@ def post_process_metrics() -> None:
 
     document_id = "processed_metrics"
     model_version = f"pr-{pr_info['Number']}"
+
+    if OVERLAY_NAME:
+        model_version = model_version + f"-{OVERLAY_NAME}"
 
     with open(METRICS_FILE_PATH) as f:
         metrics = json.load(f)
