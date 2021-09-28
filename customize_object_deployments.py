@@ -22,6 +22,7 @@ import json
 import yaml
 import os
 import logging
+import uuid
 
 from pathlib import Path
 
@@ -40,7 +41,7 @@ OVERLAY_NAME = os.environ["PIPELINE_HELPERS_OVERLAY_NAME"]
 DEPLOYMENT_CONFIG_NAME = os.getenv("PIPELINE_HELPERS_DEPLOYMENT_CONFIG_NAME", "deploymentconfig.yaml")
 
 
-def _customize_deployment_config(label: str) -> None:
+def _customize_deployment_config(label: str, uid: str, overlay_name: str = "") -> None:
     """Customize DeploymentConfig."""
     path_manifests = Path.cwd().joinpath("manifests")
 
@@ -55,12 +56,14 @@ def _customize_deployment_config(label: str) -> None:
         dc_loaded = yaml.safe_load(stream)
 
     new_dc = dict(dc_loaded)
-    new_dc["spec"]["selector"]["service"] = label
-    new_dc["metadata"]["name"] = label
+    new_dc["spec"]["selector"]["service"] = overlay_name + "-" + uid
+    new_dc["metadata"]["name"] = label + "-" + overlay_name
     new_dc["metadata"]["labels"] = {}
-    new_dc["metadata"]["labels"]["service"] = label
-    new_dc["spec"]["template"]["spec"]["containers"][0]["name"] = label
-    new_dc["spec"]["template"]["metadata"]["labels"]["service"] = label
+    new_dc["metadata"]["labels"]["component"] = label
+    new_dc["metadata"]["labels"]["overlay_name"] = overlay_name
+    new_dc["metadata"]["labels"]["service"] = overlay_name + "-" + uid
+    new_dc["spec"]["template"]["spec"]["containers"][0]["name"] = overlay_name + "-" + uid
+    new_dc["spec"]["template"]["metadata"]["labels"]["service"] = overlay_name + "-" + uid
     new_dc["spec"]["template"]["spec"]["containers"][0]["image"] = IMAGE_URL
 
     _LOGGER.info(f"Updated Deployment Config: {new_dc}")
@@ -71,15 +74,18 @@ def _customize_deployment_config(label: str) -> None:
         yaml.dump(new_dc, outfile, default_flow_style=False, allow_unicode=True)
 
 
-def _customize_route(label: str) -> None:
+def _customize_route(label: str, uid: str, overlay_name: str = "") -> None:
     """Customize Route."""
     with open("/opt/app-root/src/manifests/template/route.yaml", "r") as stream:
         route_loaded = yaml.safe_load(stream)
 
     new_route = dict(route_loaded)
-    new_route["metadata"]["name"] = label
-    new_route["metadata"]["labels"]["service"] = label
-    new_route["spec"]["to"]["name"] = label
+    new_route["metadata"]["name"] = overlay_name + "-" + uid
+    new_route["metadata"]["labels"]["service"] = overlay_name + "-" + uid
+    new_route["metadata"]["labels"]["component"] = label
+    new_route["metadata"]["labels"]["discover"] = label + "-" + overlay_name
+    new_route["metadata"]["labels"]["overlay_name"] = overlay_name
+    new_route["spec"]["to"]["name"] = overlay_name + "-" + uid
     _LOGGER.info(f"Updated Route: {new_route}")
 
     # Write Route YAML file
@@ -87,15 +93,17 @@ def _customize_route(label: str) -> None:
         yaml.dump(new_route, outfile, default_flow_style=False, allow_unicode=True)
 
 
-def _customize_service(label: str) -> None:
+def _customize_service(label: str, uid: str, overlay_name: str = "") -> None:
     """Customize Service."""
     with open("/opt/app-root/src/manifests/template/service.yaml", "r") as stream:
         service_loaded = yaml.safe_load(stream)
 
     new_service = dict(service_loaded)
-    new_service["metadata"]["name"] = label
-    new_service["metadata"]["labels"]["service"] = label
-    new_service["spec"]["selector"]["service"] = label
+    new_service["metadata"]["name"] = overlay_name + "-" + uid
+    new_service["metadata"]["labels"]["service"] = overlay_name + "-" + uid
+    new_service["metadata"]["labels"]["component"] = label
+    new_service["metadata"]["labels"]["overlay_name"] = overlay_name
+    new_service["spec"]["selector"]["service"] = overlay_name + "-" + uid
     _LOGGER.info(f"Updated Service: {new_service}")
 
     # Write Service YAML file
@@ -108,16 +116,19 @@ def customize_manifests() -> None:
     with open("/workspace/pr/pr.json") as f:
         pr_info = json.load(f)
 
-    label = f'{pr_info["Base"]["Repo"]["Name"]}-pr-{pr_info["Number"]}-gather-{OVERLAY_NAME}'
+    label = f'{pr_info["Base"]["Repo"]["Name"]}-pr-{pr_info["Number"]}'
+
+    long_id = uuid.uuid5(uuid.NAMESPACE_DNS, label)
+    uid = str(long_id).split("-")[0]
 
     # Handle DC
-    _customize_deployment_config(label=label)
+    _customize_deployment_config(label, uid, OVERLAY_NAME)
 
     # Handle Route YAMLfile
-    _customize_route(label=label)
+    _customize_route(label, uid, OVERLAY_NAME)
 
     # Handle Service YAML file
-    _customize_service(label=label)
+    _customize_service(label, uid, OVERLAY_NAME)
 
 
 if __name__ == "__main__":
