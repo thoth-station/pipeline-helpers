@@ -22,6 +22,9 @@ import json
 import yaml
 import os
 import logging
+import uuid
+
+from pathlib import Path
 
 
 _DEBUG_LEVEL = bool(int(os.getenv("DEBUG_LEVEL", 0)))
@@ -34,28 +37,34 @@ else:
 _LOGGER = logging.getLogger("thoth.customize_object_deployments")
 
 IMAGE_URL = os.environ["PIPELINE_HELPERS_IMAGE_URL_DEPLOYMENT"]
-DEPLOYMENT_NAME = os.environ["PIPELINE_HELPERS_DEPLOYMENT_NAME"]
+OVERLAY_NAME = os.environ["PIPELINE_HELPERS_OVERLAY_NAME"]
+DEPLOYMENT_CONFIG_NAME = os.getenv("PIPELINE_HELPERS_DEPLOYMENT_CONFIG_NAME", "deploymentconfig.yaml")
 
 
-def customize_object_deployments() -> None:
-    """Customize object for deployment."""
-    with open("/workspace/pr/pr.json") as f:
-        pr_info = json.load(f)
+def _customize_deployment_config(label: str, uid: str, overlay_name: str = "") -> None:
+    """Customize DeploymentConfig."""
+    path_manifests = Path.cwd().joinpath("manifests")
 
-    label = f'{pr_info["Base"]["Repo"]["Name"]}-pr-{pr_info["Number"]}-gather-{DEPLOYMENT_NAME}'
+    if OVERLAY_NAME:
+        path_overlays = path_manifests.joinpath("overlays")
+        path_dc = path_overlays.joinpath(OVERLAY_NAME).joinpath(DEPLOYMENT_CONFIG_NAME)
+    else:
+        # Use default one for single deployment
+        path_dc = Path(f"/opt/app-root/src/manifests/template/{DEPLOYMENT_CONFIG_NAME}")
 
-    # Handle DC YAMLfile
-    with open("/opt/app-root/src/manifests/template/deploymentconfig.yaml", "r") as stream:
+    with open(path_dc, "r") as stream:
         dc_loaded = yaml.safe_load(stream)
 
     new_dc = dict(dc_loaded)
-    new_dc["metadata"]["name"] = label
+    new_dc["spec"]["selector"]["service"] = overlay_name + "-" + uid
+    new_dc["metadata"]["name"] = label + "-" + overlay_name
     new_dc["metadata"]["labels"] = {}
-    new_dc["metadata"]["labels"]["service"] = label
-    new_dc["spec"]["template"]["spec"]["containers"][0]["name"] = label
-    new_dc["spec"]["template"]["metadata"]["labels"]["service"] = label
+    new_dc["metadata"]["labels"]["component"] = label
+    new_dc["metadata"]["labels"]["overlay_name"] = overlay_name
+    new_dc["metadata"]["labels"]["service"] = overlay_name + "-" + uid
+    new_dc["spec"]["template"]["spec"]["containers"][0]["name"] = overlay_name + "-" + uid
+    new_dc["spec"]["template"]["metadata"]["labels"]["service"] = overlay_name + "-" + uid
     new_dc["spec"]["template"]["spec"]["containers"][0]["image"] = IMAGE_URL
-    new_dc["spec"]["selector"]["service"] = label
 
     _LOGGER.info(f"Updated Deployment Config: {new_dc}")
 
@@ -64,34 +73,63 @@ def customize_object_deployments() -> None:
     with io.open("/workspace/repo/customized_deploymentconfig.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(new_dc, outfile, default_flow_style=False, allow_unicode=True)
 
-    # Handle Route YAMLfile
+
+def _customize_route(label: str, uid: str, overlay_name: str = "") -> None:
+    """Customize Route."""
     with open("/opt/app-root/src/manifests/template/route.yaml", "r") as stream:
         route_loaded = yaml.safe_load(stream)
 
     new_route = dict(route_loaded)
-    new_route["metadata"]["name"] = label
-    new_route["metadata"]["labels"]["service"] = label
-    new_route["spec"]["to"]["name"] = label
+    new_route["metadata"]["name"] = overlay_name + "-" + uid
+    new_route["metadata"]["labels"]["service"] = overlay_name + "-" + uid
+    new_route["metadata"]["labels"]["component"] = label
+    new_route["metadata"]["labels"]["discover"] = label + "-" + overlay_name
+    new_route["metadata"]["labels"]["overlay_name"] = overlay_name
+    new_route["spec"]["to"]["name"] = overlay_name + "-" + uid
     _LOGGER.info(f"Updated Route: {new_route}")
 
     # Write Route YAML file
     with io.open("/workspace/repo/customized_route.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(new_route, outfile, default_flow_style=False, allow_unicode=True)
 
-    # Handle Service YAML file
+
+def _customize_service(label: str, uid: str, overlay_name: str = "") -> None:
+    """Customize Service."""
     with open("/opt/app-root/src/manifests/template/service.yaml", "r") as stream:
         service_loaded = yaml.safe_load(stream)
 
     new_service = dict(service_loaded)
-    new_service["metadata"]["name"] = label
-    new_service["metadata"]["labels"]["service"] = label
-    new_service["spec"]["selector"]["service"] = label
+    new_service["metadata"]["name"] = overlay_name + "-" + uid
+    new_service["metadata"]["labels"]["service"] = overlay_name + "-" + uid
+    new_service["metadata"]["labels"]["component"] = label
+    new_service["metadata"]["labels"]["overlay_name"] = overlay_name
+    new_service["spec"]["selector"]["service"] = overlay_name + "-" + uid
     _LOGGER.info(f"Updated Service: {new_service}")
 
-    # Write Route YAML file
+    # Write Service YAML file
     with io.open("/workspace/repo/customized_service.yaml", "w", encoding="utf8") as outfile:
         yaml.dump(new_service, outfile, default_flow_style=False, allow_unicode=True)
 
 
+def customize_manifests() -> None:
+    """Customize manifests for deployment of the application."""
+    with open("/workspace/pr/pr.json") as f:
+        pr_info = json.load(f)
+
+    label = f'{pr_info["Base"]["Repo"]["Name"]}-pr-{pr_info["Number"]}'
+
+    long_id = uuid.uuid5(uuid.NAMESPACE_DNS, label)
+    uid = str(long_id).split("-")[0]
+
+    # Handle DC
+    _customize_deployment_config(label, uid, OVERLAY_NAME)
+
+    # Handle Route YAMLfile
+    _customize_route(label, uid, OVERLAY_NAME)
+
+    # Handle Service YAML file
+    _customize_service(label, uid, OVERLAY_NAME)
+
+
 if __name__ == "__main__":
-    customize_object_deployments()
+    customize_manifests()
