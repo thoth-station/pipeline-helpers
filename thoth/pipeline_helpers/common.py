@@ -34,7 +34,11 @@ _LOGGER = logging.getLogger("thoth.gather_metrics")
 
 
 def create_s3_adapter(
-    ceph_bucket_prefix: str, deployment_name: str, repo: str, pr_number: Optional[str], overlay_name: Optional[str]
+    ceph_bucket_prefix: str,
+    deployment_name: str,
+    repo: str,
+    pr_number: Optional[str] = None,
+    overlay_name: Optional[str] = None,
 ) -> CephStore:
     """Create Ceph adapter for deployment metrics."""
     prefix = f"{ceph_bucket_prefix}/{deployment_name}/deployment-metrics/{repo}"
