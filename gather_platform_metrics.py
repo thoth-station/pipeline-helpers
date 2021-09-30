@@ -43,13 +43,17 @@ DEPLOYMENT_NAMESPACE = os.getenv("PIPELINE_HELPERS_DEPLOYMENT_NAMESPACE", "aicoe
 
 def gather_platform_metrics() -> None:
     """Gather platform metrics from Openshift API (scraped by Prometheus)."""
-    pc = PrometheusConnect(
-        url=THANOS_ENDPOINT,
-        headers={"Authorization": f"bearer {THANOS_ACCESS_TOKEN}"},
-        disable_ssl=True,
-    )
+    is_connected = False
 
-    is_connected = pc.check_prometheus_connection()
+    try:
+        pc = PrometheusConnect(
+            url=THANOS_ENDPOINT,
+            headers={"Authorization": f"bearer {THANOS_ACCESS_TOKEN}"},
+            disable_ssl=True,
+        )
+        is_connected = pc.check_prometheus_connection()
+    except Exception as exc:
+        _LOGGER.warning(exc)
 
     if is_connected:
         # Store timestamps for platform metrics.
