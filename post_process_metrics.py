@@ -21,7 +21,6 @@ import os
 import logging
 import json
 
-import pandas as pd
 from thoth.pipeline_helpers.common import create_s3_adapter
 
 _DEBUG_LEVEL = bool(int(os.getenv("DEBUG_LEVEL", 0)))
@@ -34,12 +33,12 @@ else:
 _LOGGER = logging.getLogger("thoth.post_process_metrics")
 
 DEPLOYMENT_NAMESPACE = os.getenv("PIPELINE_HELPERS_DEPLOYMENT_NAMESPACE", "aicoe-ci")
+OVERLAY_NAME = os.getenv("PIPELINE_HELPERS_OVERLAY_NAME")
 METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_METRICS_FILE_PATH", "metrics.json")
 PLATFORM_METRICS_FILE_PATH = os.getenv("PIPELINE_HELPERS_PLATFORM_METRICS_FILE_PATH", "platform_metrics.json")
 PR_FILE_PATH = os.getenv("PIPELINE_HELPERS_PR_FILE_PATH", "/workspace/pr/pr.json")
 PR_REPO_URL = os.environ["REPO_URL"]
 PR_COMMIT_SHA = os.environ["COMMIT_SHA"]
-OVERLAY_NAME = os.environ["PIPELINE_HELPERS_OVERLAY_NAME"]
 
 
 def post_process_metrics() -> None:
@@ -52,8 +51,11 @@ def post_process_metrics() -> None:
     document_id = "processed_metrics"
     model_version = f"pr-{pr_info['Number']}"
 
+    overlay_name = None
+
     if OVERLAY_NAME:
         model_version = model_version + f"-{OVERLAY_NAME}"
+        overlay_name = OVERLAY_NAME
 
     with open(METRICS_FILE_PATH) as f:
         metrics = json.load(f)
@@ -64,7 +66,13 @@ def post_process_metrics() -> None:
         platform_metrics = json.load(f)
 
     try:
-        ceph_adapter = create_s3_adapter(ceph_bucket_prefix="data", repo=repo)
+        ceph_adapter = create_s3_adapter(
+            ceph_bucket_prefix="data",
+            deployment_name=DEPLOYMENT_NAMESPACE,
+            repo=repo,
+            pr_number=str(pr_info["Number"]),
+            overlay_name=overlay_name,
+        )
         ceph_adapter.connect()
         is_connected = True
     except Exception as exc:
@@ -94,40 +102,16 @@ def post_process_metrics() -> None:
         "namespace deployment": DEPLOYMENT_NAMESPACE,
     }
 
-    metrics_data[model_version] = {}
-    metrics_data[model_version]["info_metrics"] = info_metrics
-    metrics_data[model_version]["model_application_metrics"] = metrics
-    metrics_data[model_version]["platform_metrics"] = platform_metrics
+    metrics_data["model_version"] = model_version
+    metrics_data["info_metrics"] = info_metrics
+    metrics_data["model_application_metrics"] = metrics
+    metrics_data["platform_metrics"] = platform_metrics
 
     _LOGGER.info(f"Processed data to be stored: {metrics_data}")
 
     # Store on ceph
     if is_connected:
         ceph_adapter.store_document(metrics_data, document_id)
-
-    # Store locally for next step
-    with open("pr-comment", "w") as pr_comment:
-        report = ""
-
-        report += "# AICoE CI results"
-
-        report += "\n\n## Test inputs"
-        df_info = pd.DataFrame([info_metrics])
-        report += "\n\nThe following table shows info about test used to gather metrics."
-        report += "\n\n" + df_info.to_markdown(index=False)
-
-        report += "\n\n## Model and application metrics"
-        df_metrics = pd.DataFrame([metrics])
-        report += "\n\nThe following table shows gathered metrics for model and application on your deployed models."
-        report += "\n\n" + df_metrics.to_markdown(index=False)
-
-        report += "\n\n## Platform metrics"
-        df_platform = pd.DataFrame([platform_metrics])
-        report += "\n\nThe following table shows gathered metrics from platform on your deployed models."
-        report += "\n\n" + df_platform.to_markdown(index=False)
-
-        _LOGGER.info(f"PR comment is:\n{report}")
-        pr_comment.write(report)
 
 
 if __name__ == "__main__":
