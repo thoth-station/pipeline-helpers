@@ -1,5 +1,31 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.6.0 (2021-10-18T18:49:34)
+* Introduce aggregate from multiple pipeline results
+* Modify post process metrics
+* add try,except for Prometheus
+* Remove unusued variable
+* Add overlay to post process metrics
+* add uid for route name
+* Adjust dc path for non overlay case
+* Add check on Ceph connection
+* update pre-commit
+* Extend tasks for multiple deployments
+* :arrow_up: Automatic update of dependencies by Kebechet for the ubi8 environment
+* Add deployment config customization env
+* Customize name for multiple deployments
+* Rename env variable
+* Add filter for container
+* adjust output
+* update prow
+* Introduce gather platform metrics step
+* Add library prometheus-api-client
+* :arrow_up: Automatic update of dependencies by Kebechet
+* make pre-commit happy
+* make parameter mandatory
+* Add possibility to deploy in other namespaces
+* :arrow_up: Automatic update of dependencies by Kebechet
+
 ## [0.1.0] - 2019-Sep-11 - goern
 
 ### Added
