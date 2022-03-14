@@ -26,15 +26,15 @@ import yaml
 
 from packaging import version
 from typing import Optional
+from thoth.common import init_logging
+
+init_logging()
 
 _DEBUG_LEVEL = bool(int(os.getenv("DEBUG_LEVEL", 0)))
-
-if _DEBUG_LEVEL:
-    logging.basicConfig(level=logging.DEBUG)
-else:
-    logging.basicConfig(level=logging.INFO)
-
 _LOGGER = logging.getLogger("thoth.bump_base_image_version")
+if _DEBUG_LEVEL:
+    _LOGGER.setLevel(logging.DEBUG)
+
 
 CONFIG_FILE_PATH = os.getenv("CONFIG_FILE_PATH", ".aicoe-ci.yaml")
 REPOSITORY_PATH = os.getenv("REPOSITORY_PATH")  # type: Optional[str]

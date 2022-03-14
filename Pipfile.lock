@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d8dffe0eca53845435271ef58a5654f444c6e284046b293903ee86400529a560"
+            "sha256": "be128d03e1eb2a9b72f9de6148d02d2b2ade01c7ecbce4b81baac600eb7f1164"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -166,7 +166,7 @@
                 "sha256:f04e857b59d9d1ccc39ce2da1021d196e47234873820cbeaad210724b1ee28ac",
                 "sha256:fadbfe37f74051d024037f223b8e001611eac868b5c5b06144ef4d8b799862f2"
             ],
-            "markers": "python_version >= '3.6' and python_version < '3.9'",
+            "markers": "python_version < '3.9'",
             "version": "==0.2.1"
         },
         "beautifulsoup4": {
@@ -1106,6 +1106,14 @@
             ],
             "version": "==1.5.7"
         },
+        "setuptools": {
+            "hashes": [
+                "sha256:2347b2b432c891a863acadca2da9ac101eae6169b1d3dfee2ec605ecd50dbfe5",
+                "sha256:e4f30b9f84e5ab3decf945113119649fec09c1fc3507c6ebffec75646c56e62b"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==60.9.3"
+        },
         "six": {
             "hashes": [
                 "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926",
@@ -1182,6 +1190,7 @@
                 "sha256:4c7c850de3dda5c381c509726b732bfd7c714313aca08578e0f2ca850956d35e",
                 "sha256:9bd73618d9c31463ae9959988d061923879915c4f89e6f02bd254a4cffd33699"
             ],
+            "index": "pypi",
             "version": "==0.36.0"
         },
         "thoth-python": {
@@ -1338,7 +1347,7 @@
                 "sha256:9f50f446828eb9d45b267433fd3e9da8d801f614129124863f9c51ebceafb87d",
                 "sha256:b47250dd24f92b7dd6a0a8fc5244da14608f3ca90a5efcd37a3b1642fac9a375"
             ],
-            "markers": "python_version < '3.10'",
+            "markers": "python_version >= '3.7'",
             "version": "==3.7.0"
         }
     },
@@ -1686,6 +1695,7 @@
                 "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc",
                 "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"
             ],
+            "markers": "python_version >= '3.7'",
             "version": "==2.0.1"
         },
         "typing-extensions": {
