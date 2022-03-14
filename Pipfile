@@ -8,6 +8,7 @@ thoth-storages = "*"
 pandas = "*"
 tabulate = "*"
 prometheus-api-client = "*"
+thoth-common = "*"
 
 [dev-packages]
 pytest = "*"
