@@ -110,10 +110,12 @@ def bump_base_image_versions() -> None:
 
         base_image_url_to_latest_version["quay.io/" + base_image_url] = latest_image_version
 
-    for base_image, latest_version in base_image_url_to_latest_version.items():
-        os.system(f"sed -i s@{base_image}@{base_image.split(':')[0] + ':' + latest_version}@g {config_file}")
+    current_version = base_image_url.split(":")[1]
+    if current_version != latest_image_version:
+        for base_image, latest_version in base_image_url_to_latest_version.items():
+            os.system(f"sed -i s@{base_image}@{base_image.split(':')[0] + ':' + latest_version}@g {config_file}")
 
-    _LOGGER.info(f"File {config_file} has been updated with latest base image versions.")
+        _LOGGER.info(f"File {config_file} has been updated with latest base image versions.")
 
 
 if __name__ == "__main__":
