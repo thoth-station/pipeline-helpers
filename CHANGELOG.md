@@ -1,5 +1,11 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.7.0 (2022-03-14T12:01:21)
+* Use init_logging from thoth_common
+* :arrow_up: Automatic update of dependencies by Kebechet for the ubi8 environment
+* Post-review changes
+* Add script to bump base image versions to latest
+
 ## Release 0.6.0 (2021-10-18T18:49:34)
 * Introduce aggregate from multiple pipeline results
 * Modify post process metrics
