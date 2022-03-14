@@ -92,15 +92,12 @@ def bump_base_image_versions() -> None:
     for base_image_url in base_image_urls:
         _LOGGER.info(f"Requesting the latest base image version from Quay.io for {base_image_url}")
 
+        r = requests.get(f"https://quay.io/api/v1/repository/{base_image_url.split(':')[0]}").text
         image_versions = [
-            version.strip("v")
-            for version in json.loads(
-                requests.get("https://quay.io/api/v1/repository/" + base_image_url.split(":")[0]).text
-            )["tags"].keys()
-            if version.startswith("v")
+            version.strip("v") for version in json.loads(r).get("tags", {}).keys() if version.startswith("v")
         ]
 
-        latest_image_version = "0.0.0"
+        latest_image_version = base_image_url.split(":")[1].strip("v")
         for image_version in image_versions:
             if version.parse(image_version) > version.parse(latest_image_version):
                 latest_image_version = image_version
