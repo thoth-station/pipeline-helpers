@@ -39,6 +39,7 @@ if _DEBUG_LEVEL:
 CONFIG_FILE_PATH = os.getenv("CONFIG_FILE_PATH", ".aicoe-ci.yaml")
 REPOSITORY_PATH = os.getenv("REPOSITORY_PATH")  # type: Optional[str]
 BASE_IMAGE_FIELD_YAML = os.getenv("BASE_IMAGE_FIELD_YAML", "base-image")
+QUAY_TOKEN = os.getenv("THOTH_QUAY_TOKEN")
 
 
 def _find_config_files_base_image_keys(file_dict: dict) -> typing.List[list]:
@@ -92,7 +93,10 @@ def bump_base_image_versions() -> None:
     for base_image_url in base_image_urls:
         _LOGGER.info(f"Requesting the latest base image version from Quay.io for {base_image_url}")
 
-        r = requests.get(f"https://quay.io/api/v1/repository/{base_image_url.split(':')[0]}").text
+        r = requests.get(
+            f"https://quay.io/api/v1/repository/{base_image_url.split(':')[0]}",
+            headers={"Authorization": f"Bearer {QUAY_TOKEN}"},
+        ).text
         image_versions = [
             version.strip("v") for version in json.loads(r).get("tags", {}).keys() if version.startswith("v")
         ]
@@ -106,10 +110,12 @@ def bump_base_image_versions() -> None:
 
         base_image_url_to_latest_version["quay.io/" + base_image_url] = latest_image_version
 
-    for base_image, latest_version in base_image_url_to_latest_version.items():
-        os.system(f"sed -i s@{base_image}@{base_image.split(':')[0] + ':' + latest_version}@g {config_file}")
+    current_version = base_image_url.split(":")[1]
+    if current_version != latest_image_version:
+        for base_image, latest_version in base_image_url_to_latest_version.items():
+            os.system(f"sed -i s@{base_image}@{base_image.split(':')[0] + ':' + latest_version}@g {config_file}")
 
-    _LOGGER.info(f"File {config_file} has been updated with latest base image versions.")
+        _LOGGER.info(f"File {config_file} has been updated with latest base image versions.")
 
 
 if __name__ == "__main__":
