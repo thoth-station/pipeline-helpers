@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# setup our git workspace
+git config --local user.email "$GITHUB_EMAIL"
+git config --local user.name "$GITHUB_USERNAME"
+git remote set-url origin ${GITHUB_SSH_URL}
+
+# ssh key is mounted in via tektop pipeline task...
+export GIT_SSH_COMMAND='ssh -i /tekton/home/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+
+# create a branch and push our work...
+git checkout -b aicoe-ci/base-image-updater
+git add .
+git commit -m ":ship: Bump up base image initialized in CI." || exit 0
+git pull --rebase origin ${GITHUB_DEFAULT_BRANCH}
+git push -f origin aicoe-ci/base-image-updater
+
+#end.
