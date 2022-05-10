@@ -1,5 +1,16 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.7.1 (2022-05-10T11:20:04)
+* fc41fa7 :arrow_up: Automatic update of dependencies by Kebechet for the ubi8 environment
+* fcc0634 Fix pre-commit config
+* 4db6a85 Add my username to maintainers
+* 274d989 :arrow_up: Automatic update of dependencies by Kebechet for the ubi8 environment
+* 142494d :arrow_up: Automatic update of dependencies by Kebechet for the ubi8 environment
+* 530acab update pre-commit plugins
+* d534fee updating pre-commit protocol and aicoe build-strategy
+* 0acde54 Don't update the version if it's equal to latest
+* d58a772 Add Quay authentication to bump image version script
+
 ## Release 0.7.0 (2022-03-14T12:01:21)
 * Use init_logging from thoth_common
 * :arrow_up: Automatic update of dependencies by Kebechet for the ubi8 environment
