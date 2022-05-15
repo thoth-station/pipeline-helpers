@@ -1,5 +1,8 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.7.2 (2022-05-15T17:17:38)
+* 1fbe0b8 :arrow_up: Automatic update of dependencies by Kebechet for the ubi8 environment
+
 ## Release 0.7.1 (2022-05-10T11:20:04)
 * fc41fa7 :arrow_up: Automatic update of dependencies by Kebechet for the ubi8 environment
 * fcc0634 Fix pre-commit config
